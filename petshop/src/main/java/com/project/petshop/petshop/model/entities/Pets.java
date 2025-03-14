@@ -16,7 +16,7 @@ public class Pets {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     @ManyToOne
-    private Client client;
+    private User client;
     @OneToOne
     private Breed dogBreed;
     private Date birthDate;

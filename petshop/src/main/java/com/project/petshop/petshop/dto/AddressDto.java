@@ -10,8 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddressDto {
-    private int idClient;
-    private String bullShit;
+    private Long idUser;
+    private String bullShit; /* Logradouro */
     private String city;
     private String complement;
 }

@@ -4,6 +4,8 @@ import com.project.petshop.petshop.model.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -13,8 +15,12 @@ import lombok.*;
 @Table(name = "user_table")
 public class User {
     @Id
-    private int CPF;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String userCpf;
+    @Enumerated(EnumType.STRING)
     private Profile profile;
     private String fullName;
     private String password;
+    private Date signUpDate;
 }

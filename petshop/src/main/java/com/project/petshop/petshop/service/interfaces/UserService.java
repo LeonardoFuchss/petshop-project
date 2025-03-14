@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface UserService {
     public void save(UserDto userdTO);
-    public List<UserDto> findAll();
-    public UserDto findById(int id);
-    public void delete(int id);
+    public List<User> findAll();
+    public User findById(Long id);
+    public void delete(Long id);
 }

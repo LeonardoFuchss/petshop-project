@@ -14,10 +14,10 @@ import lombok.*;
 public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
     @ManyToOne
-    private Client client;
+    private User client;
     private TagContact tag;
     private TypeContact typeContact;
-    private Double value;
+    private String value;
 }

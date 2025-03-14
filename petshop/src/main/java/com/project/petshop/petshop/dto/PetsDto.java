@@ -1,9 +1,6 @@
 package com.project.petshop.petshop.dto;
 
 import com.project.petshop.petshop.model.entities.Breed;
-import com.project.petshop.petshop.model.entities.Client;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

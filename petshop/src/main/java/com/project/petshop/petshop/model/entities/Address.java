@@ -12,9 +12,10 @@ import lombok.*;
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
     @ManyToOne
-    private Client client;
+    private User user;
+    private String nameUser;
     private String bullshit; /* Logradouro */
     private String city;
     private String complement;

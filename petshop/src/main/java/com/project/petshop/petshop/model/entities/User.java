@@ -1,6 +1,6 @@
 package com.project.petshop.petshop.model.entities;
 
-import com.project.petshop.petshop.model.Profile;
+import com.project.petshop.petshop.model.enums.Profile;
 import jakarta.persistence.*;
 import lombok.*;
 

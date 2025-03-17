@@ -14,11 +14,13 @@ import java.util.Date;
 public class Pets {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
     @ManyToOne
     private User client;
-    @OneToOne
+    @ManyToOne
     private Breed dogBreed;
     private Date birthDate;
+    private String clientName;
     private String dogName;
+    private String descriptionBreed;
 }

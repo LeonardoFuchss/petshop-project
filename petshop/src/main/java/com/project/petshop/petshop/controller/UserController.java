@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping
@@ -30,8 +31,8 @@ public class UserController {
     }
 
     @GetMapping("/find/{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id) {
-        User user = userService.findById(id);
+    public ResponseEntity<Optional<User>> findById(@PathVariable Long id) {
+        Optional<User> user = userService.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
     @DeleteMapping("/delete/{id}")

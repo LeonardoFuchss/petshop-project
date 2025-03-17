@@ -15,11 +15,12 @@ import java.util.Optional;
 @RequestMapping("/contact")
 @CrossOrigin("*")
 public class ContactController {
+
     @Autowired
     private ContactService contactService;
 
     @PostMapping("/save")
-    public ResponseEntity<Void> addContact(ContactDto contactDto) {
+    public ResponseEntity<Void> addContact(@RequestBody ContactDto contactDto) {
         contactService.save(contactDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

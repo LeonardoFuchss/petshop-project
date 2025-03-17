@@ -21,7 +21,7 @@ public class AddressMapper {
         return Address.builder()
                 .city(addressDto.getCity())
                 .complement(addressDto.getComplement())
-                .bullshit(addressDto.getBullShit())
+                .street(addressDto.getStreet())
                 .nameUser(user.getFullName())
                 .user(user)
                 .build();

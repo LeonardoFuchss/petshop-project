@@ -19,6 +19,7 @@ public class ContactMapper {
 
         return Contact.builder()
                 .typeContact(contactDto.getTypeContact())
+                .tag(contactDto.getTag())
                 .value(contactDto.getValue())
                 .client(user)
                 .build();

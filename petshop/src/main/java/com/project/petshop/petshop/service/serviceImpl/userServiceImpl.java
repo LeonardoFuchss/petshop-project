@@ -1,6 +1,8 @@
 package com.project.petshop.petshop.service.serviceImpl;
 
 import com.project.petshop.petshop.dto.UserDto;
+import com.project.petshop.petshop.exceptions.user.UserAlreadyException;
+import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
 import com.project.petshop.petshop.mapper.UserMapper;
 import com.project.petshop.petshop.model.entities.User;
 import com.project.petshop.petshop.repository.UserRepository;
@@ -10,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.LongFunction;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -25,23 +26,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void save(UserDto userdTO) {
+        if (userRepository.findByUserCpf(userdTO.getUserCpf()).isPresent()) {
+            throw new UserAlreadyException("User already exists");
+        }
         User user = userMapper.toEntity(userdTO);
         userRepository.save(user);
     }
 
     @Override
     public List<User> findAll() {
-        return userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            throw new UserNotFoundException("Users not found");
+        }
+        return users;
     }
 
     @Override
-    public User findById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public Optional<User> findById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User not found");
+        }
+        return user;
     }
 
     @Override
     public void delete(Long id) {
         Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User not found");
+        }
         user.ifPresent(value -> userRepository.delete(value));
     }
 }

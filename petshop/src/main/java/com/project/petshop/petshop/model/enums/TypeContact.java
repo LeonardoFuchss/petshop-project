@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.model;
+package com.project.petshop.petshop.model.enums;
 
 public enum TypeContact {
     EMAIL,

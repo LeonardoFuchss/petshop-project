@@ -4,12 +4,13 @@ import com.project.petshop.petshop.dto.PetsDto;
 import com.project.petshop.petshop.model.entities.Pets;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface PetsService {
 
-    public void save(PetsDto petsDto);
+    public Pets save(PetsDto petsDto);
     public List<Pets> findAll();
     public List<Pets> findByClientName(String clientName);
-    public Pets findById(Long id);
+    public Optional<Pets> findById(Long id);
     public void delete(Long id);
 }

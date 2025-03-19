@@ -25,12 +25,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(UserDto userdTO) {
+    public User save(UserDto userdTO) {
         if (userRepository.findByUserCpf(userdTO.getUserCpf()).isPresent()) {
             throw new UserAlreadyException("User already exists");
         }
         User user = userMapper.toEntity(userdTO);
         userRepository.save(user);
+        return user;
     }
 
     @Override

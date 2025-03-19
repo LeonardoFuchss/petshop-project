@@ -3,6 +3,7 @@ package com.project.petshop.petshop.controller;
 import com.project.petshop.petshop.dto.UserDto;
 import com.project.petshop.petshop.model.entities.User;
 import com.project.petshop.petshop.service.interfaces.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/save")
-    public ResponseEntity<Void> save(@RequestBody UserDto userdTO) {
-        userService.save(userdTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<?> save(@RequestBody UserDto userdTO) {
+        User user = userService.save(userdTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @GetMapping("/findAll")

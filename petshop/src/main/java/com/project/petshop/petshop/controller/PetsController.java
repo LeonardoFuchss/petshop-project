@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/pets")
@@ -18,16 +19,16 @@ public class PetsController {
     private PetsService petsService;
 
     @PostMapping("/save")
-    public ResponseEntity<Void> save(@RequestBody PetsDto petsDto) {
-        petsService.save(petsDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<?> save(@RequestBody PetsDto petsDto) {
+        Pets pets = petsService.save(petsDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pets);
     }
     @GetMapping("/findAll")
     public ResponseEntity<List<Pets>> findAll() {
         return ResponseEntity.ok(petsService.findAll());
     }
     @GetMapping("/find/{id}")
-    public ResponseEntity<Pets> findById(@PathVariable Long id) {
+    public ResponseEntity<Optional<Pets>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(petsService.findById(id));
     }
     @DeleteMapping("/delete/{id}")

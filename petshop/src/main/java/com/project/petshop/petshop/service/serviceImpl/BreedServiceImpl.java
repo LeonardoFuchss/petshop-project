@@ -18,9 +18,10 @@ public class BreedServiceImpl implements BreedService {
     private BreedMapper breedMapper;
 
     @Override
-    public void save(BreedDto breedDto) {
+    public Breed save(BreedDto breedDto) {
         Breed breed = breedMapper.toEntity(breedDto);
         breedRepository.save(breed);
+        return breed;
     }
 
     @Override

@@ -19,9 +19,9 @@ public class BreedController {
     private BreedService breedService;
 
     @PostMapping("/save")
-    public ResponseEntity<Void> save(@RequestBody BreedDto breedDto) {
-        breedService.save(breedDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<?> save(@RequestBody BreedDto breedDto) {
+        Breed breed = breedService.save(breedDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(breed);
     }
     @GetMapping("/findAll")
     public ResponseEntity<List<Breed>> findAll() {

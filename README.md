@@ -4,7 +4,7 @@
 
 ### Sistema de controle de atendimentos de uma petshop, fornecendo gerenciamento de cadastros de clientes e seus respectivos pets. O sistema possui dois tipos de acesso:
 
-🔹 Admin: Pode incluir, excluir, alterar e visualizar qualquer cadastro.
+🔹 Admin: Pode incluir, excluir, alterar e visualizar qualquer cadastro. <br>
 🔹 Cliente: Pode visualizar e alterar apenas os seus registros e/ou registros dos seus pets.
 
 ---

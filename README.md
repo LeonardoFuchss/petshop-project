@@ -44,3 +44,7 @@ A API utiliza autenticação baseada em JWT. Para acessar os endpoints protegido
 1️⃣ Realize o login para obter um token JWT.
 
 2️⃣ Utilize o token no cabeçalho das requisições:
+
+
+
+

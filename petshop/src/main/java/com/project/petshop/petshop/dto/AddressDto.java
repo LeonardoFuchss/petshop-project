@@ -12,9 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddressDto {
-    @NotNull(message = "The client cannot be null and void.")
+    @NotNull(message = "The client cannot be null or void.")
     private Long idUser;
-    @NotNull(message = "Bullshit cannot be null")
+    @NotNull(message = "Street cannot be null")
     @Size(min = 3, max = 20, message = "Street name is invalid. Must be greater than 3 and less than 20 characters")
     private String street; /* Logradouro */
     @NotNull(message = "City cannot be null")

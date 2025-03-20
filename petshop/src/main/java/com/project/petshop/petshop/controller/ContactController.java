@@ -3,6 +3,7 @@ package com.project.petshop.petshop.controller;
 import com.project.petshop.petshop.dto.ContactDto;
 import com.project.petshop.petshop.model.entities.Contact;
 import com.project.petshop.petshop.service.interfaces.ContactService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,14 +14,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/contact")
-@CrossOrigin("*")
 public class ContactController {
 
     @Autowired
     private ContactService contactService;
 
     @PostMapping("/save")
-    public ResponseEntity<Void> addContact(@RequestBody ContactDto contactDto) {
+    public ResponseEntity<Void> addContact(@Valid @RequestBody ContactDto contactDto) {
         contactService.save(contactDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

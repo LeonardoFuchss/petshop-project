@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.br.CPF;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -23,9 +24,9 @@ public class UserDto {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "The profile value cannot be null")
     @Pattern(regexp = "ADMIN|CLIENT", message = "Inválid Profile. Use ADMIN or CLIENT")
-    private Profile profile;
+    private String profile;
     @NotNull(message = "the name cannot be null")
-    @Size(min = 4, max = 30, message = "Invalid name size")
+    @Size(min = 4, max = 30, message = "Invalid full name size")
     private String fullName;
     @NotBlank(message = "The password value cannot be null")
     @Pattern(
@@ -33,7 +34,4 @@ public class UserDto {
             message = "The password must have at least one uppercase letter, a lowercase, a number and a special character"
     )
     private String password;
-    @NotNull(message = "Date value cannot be null")
-    @PastOrPresent(message = "Invalid date. The date cannot be in the future.")
-    private Date signUpDate;
 }

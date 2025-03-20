@@ -3,6 +3,7 @@ package com.project.petshop.petshop.controller;
 import com.project.petshop.petshop.dto.AppointmentDto;
 import com.project.petshop.petshop.model.entities.Appointment;
 import com.project.petshop.petshop.service.interfaces.AppointmentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,14 +13,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/appointment")
-@CrossOrigin("*")
 public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
 
     @PostMapping("/save")
-    public ResponseEntity<Void> save (@RequestBody AppointmentDto appointmentDto) {
+    public ResponseEntity<Void> save (@Valid @RequestBody AppointmentDto appointmentDto) {
         appointmentService.save(appointmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

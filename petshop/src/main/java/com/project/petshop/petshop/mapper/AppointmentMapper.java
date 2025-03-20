@@ -1,12 +1,15 @@
 package com.project.petshop.petshop.mapper;
 
 import com.project.petshop.petshop.dto.AppointmentDto;
+import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
 import com.project.petshop.petshop.model.entities.Pets;
 import com.project.petshop.petshop.model.entities.Appointment;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class AppointmentMapper {
@@ -19,15 +22,19 @@ public class AppointmentMapper {
 
     public Appointment toEntity(AppointmentDto serviceDto) {
 
-        Pets pets = petsRepository.findById(serviceDto.getIdPet()).orElse(null);
+        Optional<Pets> pets = petsRepository.findById(serviceDto.getIdPet());
 
-        return Appointment.builder()
-                .pet(pets)
-                .price(serviceDto.getPrice())
-                .description(serviceDto.getDescription())
-                .date(serviceDto.getDate())
-                .petName(pets.getDogName())
-                .clientName(pets.getClientName())
-                .build();
+        if (pets.isEmpty()) {
+            throw new PetsNotFound("Pet not found");
+        } else {
+            return Appointment.builder()
+                    .pet(pets.get())
+                    .price(serviceDto.getPrice())
+                    .description(serviceDto.getDescription())
+                    .date(serviceDto.getDate())
+                    .petName(pets.get().getDogName())
+                    .clientName(pets.get().getClientName())
+                    .build();
+        }
     }
 }

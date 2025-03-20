@@ -20,7 +20,7 @@ Implementar um serviço que permita a gestão de clientes e pets através de uma
 ✅ Linguagem: Java 17 ou superior <br>
 ✅ Framework: Spring Boot / Quarkus / Micronaut <br>
 ✅ Banco de Dados: Relacional (PostgreSQL, MySQL, etc.) <br>
-... Autenticação: JWT (JSON Web Token) <br>
+✅ Autenticação: JWT (JSON Web Token) <br>
 ... Controle de Acesso: Role-based authorization <br>
 ... Testes: Testes unitários para garantir o funcionamento da API <br>
 ✅ Controle de Versão: Git (repositório público) <br>

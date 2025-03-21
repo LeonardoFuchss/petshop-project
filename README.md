@@ -27,13 +27,17 @@ Implementar um serviço que permita a gestão de clientes e pets através de uma
 
 ---
 
-## 🛠 Como Executar o Projeto
+## 🛠 Como Executar o Projeto Localmente
 
-1️⃣ Clone o repositório:
+1 - Clone o repositório (git clone <repo-url>) -> (cd nome-projeto)
 
-2️⃣ Configure o banco de dados no arquivo application.properties (Spring Boot) ou equivalente.
+2 - Instale o docker.
 
-3️⃣ Execute a aplicação:
+3 - Abra o projeto com Intellij (java 21)
+
+4 - Configure o banco de dados no arquivo docker-compose.yml
+
+5 - Rode o seguinte comando no terminal para subir os containers: docker compose up -d
 
 ---
 
@@ -43,7 +47,7 @@ A API utiliza autenticação baseada em JWT. Para acessar os endpoints protegido
 
 1️⃣ Realize o login para obter um token JWT.
 
-2️⃣ Utilize o token no cabeçalho das requisições:
+2️⃣ Utilize o token no cabeçalho das requisições
 
 
 

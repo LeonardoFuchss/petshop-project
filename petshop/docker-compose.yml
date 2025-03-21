@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest # Utilizando a imagem do projeto criada no dockerfile
+    container_name: petshop # Definindo nome para o container da imagem
+    restart: always
+    environment: # Configurações do banco
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: petshop
+    ports:
+      - "5432:5432" # Porta utilizada no banco
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app: # Definições do container do banco de dados
+    build: .
+    container_name: petshop-db
+    depends_on:
+      - db
+    environment:
+      SPRING_APPLICATION_NAME: petshop
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/petshop
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+    ports:
+       - "8082:8082"
+
+volumes:
+  pgdata:
+
+
+# docker-compose up -d (rodar para inicializar)

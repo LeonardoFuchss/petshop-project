@@ -1,11 +1,10 @@
 package com.project.petshop.petshop.service.serviceImpl;
 
 import com.project.petshop.petshop.dto.AppointmentDto;
-import com.project.petshop.petshop.exceptions.address.AddressNotFound;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentExist;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentNotFound;
 import com.project.petshop.petshop.mapper.AppointmentMapper;
-import com.project.petshop.petshop.model.entities.Appointment;
+import com.project.petshop.petshop.domain.entities.Appointment;
 import com.project.petshop.petshop.repository.AppointmentRepository;
 import com.project.petshop.petshop.service.interfaces.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;

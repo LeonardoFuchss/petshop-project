@@ -1,13 +1,14 @@
 package com.project.petshop.petshop.service.serviceImpl;
 
+import com.project.petshop.petshop.dto.RegisterDto;
 import com.project.petshop.petshop.dto.UserDto;
 import com.project.petshop.petshop.exceptions.user.UserAlreadyException;
 import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
 import com.project.petshop.petshop.jwt.JwtService;
+import com.project.petshop.petshop.mapper.RegisterMapper;
 import com.project.petshop.petshop.mapper.UserMapper;
-import com.project.petshop.petshop.model.AccessToken;
-import com.project.petshop.petshop.model.entities.User;
-import com.project.petshop.petshop.model.enums.Profile;
+import com.project.petshop.petshop.domain.AccessToken;
+import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,8 @@ public class UserServiceImpl implements UserService {
     private JwtService jwtService;
 
     private LocalDateTime now = LocalDateTime.now();
+    @Autowired
+    private RegisterMapper registerMapper;
 
 
     @Override
@@ -76,7 +79,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> findByUserCpf(String cpf) {
-        return findByUserCpf(cpf);
+        return userRepository.findByUserCpf(cpf);
     }
 
     @Override
@@ -90,19 +93,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AccessToken authenticate(String cpf, String password) { /* Autenticação do usuário retornando um token de acesso (Recebe as credenciais no parâmetro) */
-
         Optional<User> user = userRepository.findByUserCpf(cpf); /* Busca o usuário pelo seu cpf. */
-
         if (user.isEmpty()) { /* Verifica se o usuário existe. */
-            throw new UserNotFoundException("User not found");
+            throw new UserNotFoundException("Invalid password or invalid CPF. try again");
         }
-
         boolean matches = passwordEncoder.matches(password, user.get().getPassword()); /* Variável que verifica se a senha passada por parâmetro é igual a senha do usuário no banco. */
-
         if (matches) { /* se for igual, retorna um token com o método que gera o token. */
             return jwtService.generateToken(user.get());
         } else {
             return null; /* se não for igual, retorna null*/
         }
+    }
+
+    @Override
+    public User register(RegisterDto registerDto) {
+        if (userRepository.findByUserCpf(registerDto.getUserCpf()).isPresent()) { /* Verifica se o usuário existe */
+            throw new UserAlreadyException("User already exists");
+        }
+        User user = registerMapper.toEntity(registerDto); /* Mapeamento para entidade */
+        user.setSignUpDate(now);
+
+        encodePassword(user); /* Chama a função abaixo que criptografa a senha */
+        userRepository.save(user); /* Persiste a entidade mapeada no banco de dados */
+        return user;
     }
 }

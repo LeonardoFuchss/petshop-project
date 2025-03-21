@@ -2,10 +2,10 @@ package com.project.petshop.petshop.mapper;
 
 import com.project.petshop.petshop.dto.ContactDto;
 import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
-import com.project.petshop.petshop.model.entities.Contact;
-import com.project.petshop.petshop.model.entities.User;
-import com.project.petshop.petshop.model.enums.TagContact;
-import com.project.petshop.petshop.model.enums.TypeContact;
+import com.project.petshop.petshop.domain.entities.Contact;
+import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.domain.enums.TagContact;
+import com.project.petshop.petshop.domain.enums.TypeContact;
 import com.project.petshop.petshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

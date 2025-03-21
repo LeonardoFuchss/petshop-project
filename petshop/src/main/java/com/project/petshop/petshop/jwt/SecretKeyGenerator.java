@@ -10,7 +10,7 @@ public class SecretKeyGenerator { /* Classe que gera uma chave para assinatura d
 
     private SecretKey key; /* Armazena a chave. */
 
-    public SecretKey getKey() { /* Adquirir a chave */
+    public SecretKey getKey() { /* Método para adquirir a chave */
         if (key == null) {
             key = Jwts.SIG.HS256.key().build(); /* Gera a chave */
         }

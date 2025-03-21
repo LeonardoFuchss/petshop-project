@@ -1,7 +1,7 @@
-package com.project.petshop.petshop.model.entities;
+package com.project.petshop.petshop.domain.entities;
 
-import com.project.petshop.petshop.model.enums.TagContact;
-import com.project.petshop.petshop.model.enums.TypeContact;
+import com.project.petshop.petshop.domain.enums.TagContact;
+import com.project.petshop.petshop.domain.enums.TypeContact;
 import jakarta.persistence.*;
 import lombok.*;
 

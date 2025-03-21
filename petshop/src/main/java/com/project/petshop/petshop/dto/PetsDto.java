@@ -1,6 +1,5 @@
 package com.project.petshop.petshop.dto;
 
-import com.project.petshop.petshop.model.entities.Breed;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
@@ -10,8 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
+
 @Getter
 @Setter
 @AllArgsConstructor

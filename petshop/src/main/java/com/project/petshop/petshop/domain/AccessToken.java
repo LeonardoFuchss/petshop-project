@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.model;
+package com.project.petshop.petshop.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

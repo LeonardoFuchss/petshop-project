@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.model.enums;
+package com.project.petshop.petshop.domain.enums;
 
 public enum TagContact {
     PERSONAL,

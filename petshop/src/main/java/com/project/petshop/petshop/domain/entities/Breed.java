@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.model.entities;
+package com.project.petshop.petshop.domain.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

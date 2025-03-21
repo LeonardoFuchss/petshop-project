@@ -1,8 +1,8 @@
 package com.project.petshop.petshop.mapper;
 
 import com.project.petshop.petshop.dto.UserDto;
-import com.project.petshop.petshop.model.entities.User;
-import com.project.petshop.petshop.model.enums.Profile;
+import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.domain.enums.Profile;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -4,7 +4,7 @@ import com.project.petshop.petshop.dto.PetsDto;
 import com.project.petshop.petshop.exceptions.pets.PetsAlreadyExist;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
 import com.project.petshop.petshop.mapper.PetsMapper;
-import com.project.petshop.petshop.model.entities.Pets;
+import com.project.petshop.petshop.domain.entities.Pets;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.PetsService;

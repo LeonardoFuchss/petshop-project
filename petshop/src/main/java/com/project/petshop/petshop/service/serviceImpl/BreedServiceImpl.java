@@ -4,7 +4,7 @@ import com.project.petshop.petshop.dto.BreedDto;
 import com.project.petshop.petshop.exceptions.breed.BreedAlreadyExist;
 import com.project.petshop.petshop.exceptions.breed.BreedNotFound;
 import com.project.petshop.petshop.mapper.BreedMapper;
-import com.project.petshop.petshop.model.entities.Breed;
+import com.project.petshop.petshop.domain.entities.Breed;
 import com.project.petshop.petshop.repository.BreedRepository;
 import com.project.petshop.petshop.service.interfaces.BreedService;
 import org.springframework.beans.factory.annotation.Autowired;

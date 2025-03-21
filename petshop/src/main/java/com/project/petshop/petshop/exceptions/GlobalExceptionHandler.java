@@ -10,10 +10,7 @@ import com.project.petshop.petshop.exceptions.contact.ContactAlreadyExist;
 import com.project.petshop.petshop.exceptions.contact.ContactNotFound;
 import com.project.petshop.petshop.exceptions.pets.PetsAlreadyExist;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
-import com.project.petshop.petshop.exceptions.user.InvalidTokenException;
-import com.project.petshop.petshop.exceptions.user.UnauthorizedException;
-import com.project.petshop.petshop.exceptions.user.UserAlreadyException;
-import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
+import com.project.petshop.petshop.exceptions.user.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -139,6 +136,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidTokenException(Exception ex, HttpServletRequest request) {
         return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Map<String, Object>> handleForbiddenException(Exception ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
     }
 
 

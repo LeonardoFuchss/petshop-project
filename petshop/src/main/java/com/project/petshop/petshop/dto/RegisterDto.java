@@ -1,8 +1,9 @@
 package com.project.petshop.petshop.dto;
 
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,14 +14,10 @@ import org.hibernate.validator.constraints.br.CPF;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class RegisterDto {
     @NotNull(message = "The CPF value cannot be null")
     @CPF(message = "Invalid CPF")
     private String userCpf;
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "The profile value cannot be null")
-    @Pattern(regexp = "ADMIN|CLIENT", message = "Inválid Profile. Use ADMIN or CLIENT")
-    private String profile;
     @NotNull(message = "the name cannot be null")
     @Size(min = 4, max = 30, message = "Invalid full name size")
     private String fullName;

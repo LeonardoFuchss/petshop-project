@@ -2,8 +2,8 @@ package com.project.petshop.petshop.mapper;
 
 import com.project.petshop.petshop.dto.AppointmentDto;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
-import com.project.petshop.petshop.model.entities.Pets;
-import com.project.petshop.petshop.model.entities.Appointment;
+import com.project.petshop.petshop.domain.entities.Pets;
+import com.project.petshop.petshop.domain.entities.Appointment;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

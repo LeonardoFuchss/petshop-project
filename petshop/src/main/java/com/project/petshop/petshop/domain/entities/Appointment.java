@@ -1,11 +1,10 @@
-package com.project.petshop.petshop.model.entities;
+package com.project.petshop.petshop.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Getter

@@ -1,8 +1,5 @@
 package com.project.petshop.petshop.dto;
 
-import com.project.petshop.petshop.model.enums.TagContact;
-import com.project.petshop.petshop.model.enums.TypeContact;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;

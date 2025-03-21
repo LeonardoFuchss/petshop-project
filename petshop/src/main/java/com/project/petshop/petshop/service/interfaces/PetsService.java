@@ -1,7 +1,7 @@
 package com.project.petshop.petshop.service.interfaces;
 
 import com.project.petshop.petshop.dto.PetsDto;
-import com.project.petshop.petshop.model.entities.Pets;
+import com.project.petshop.petshop.domain.entities.Pets;
 
 import java.util.List;
 import java.util.Optional;

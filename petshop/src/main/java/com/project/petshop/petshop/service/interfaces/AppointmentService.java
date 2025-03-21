@@ -1,7 +1,7 @@
 package com.project.petshop.petshop.service.interfaces;
 
 import com.project.petshop.petshop.dto.AppointmentDto;
-import com.project.petshop.petshop.model.entities.Appointment;
+import com.project.petshop.petshop.domain.entities.Appointment;
 
 import java.util.List;
 

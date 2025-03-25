@@ -1,17 +1,22 @@
 package com.project.petshop.petshop.service.serviceImpl;
 
+import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.dto.PetsDto;
 import com.project.petshop.petshop.exceptions.pets.PetsAlreadyExist;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
+import com.project.petshop.petshop.exceptions.user.UnauthorizedException;
 import com.project.petshop.petshop.mapper.PetsMapper;
 import com.project.petshop.petshop.domain.entities.Pets;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.PetsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -62,11 +67,22 @@ public class PetsServiceImpl implements PetsService {
 
     @Override
     public Optional<Pets> findById(Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Pets> pets = petsRepository.findById(id);
+
         if (pets.isEmpty()) {
             throw new PetsNotFound("No pet record was found.");
         }
-        return pets;
+        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+            return pets;
+        }
+        Optional<User> user = userRepository.findById(pets.get().getClient().getId());
+
+        if (Objects.equals(userDetails.getUsername(), user.get().getUserCpf())) {
+            return pets;
+        } else {
+            throw new UnauthorizedException("You do not have permission to access this resource");
+        }
     }
 
     @Override

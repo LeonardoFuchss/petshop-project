@@ -15,7 +15,6 @@ import org.hibernate.validator.constraints.br.CPF;
 @NoArgsConstructor
 public class UserDto {
     @NotNull(message = "The CPF value cannot be null")
-    @CPF(message = "Invalid CPF")
     private String userCpf;
     @Enumerated(EnumType.STRING)
     @NotNull(message = "The profile value cannot be null")

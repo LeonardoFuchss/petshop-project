@@ -47,13 +47,12 @@ public class SecurityConfig {
                         auth.requestMatchers("/users/authenticate").permitAll();
                         auth.requestMatchers("/users/register").permitAll();
                         auth.requestMatchers("/users/save").permitAll(); /* !!!! Verificar restrição de primeiro acesso */
-                        auth.requestMatchers("/users/**").hasRole("ADMIN");
+                        auth.requestMatchers("/users/**").hasAnyRole("ADMIN", "CLIENT");
                         auth.requestMatchers("/address/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/contact/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/breed/**").hasRole("ADMIN"); /* Limita acesso a admin */
-                        auth.requestMatchers("/pets/**").hasRole("ADMIN"); /* Limita acesso a admin */
-                        auth.requestMatchers("/appointment/**").hasRole("ADMIN"); /* Limita acesso a admin */
-                        auth.requestMatchers("/pets/find/{id}").hasRole("CLIENT"); /* Libera acesso ao público */
+                        auth.requestMatchers("/pets/**").hasAnyRole("ADMIN", "CLIENT");
+                        auth.requestMatchers("/appointment/**").hasRole("ADMIN"); /* Limita acesso a admin */; /* Libera acesso ao público */
                         auth.anyRequest().authenticated();
                     })
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) /* Adiciona o filtro JWT antes do filtro padrão de autenticação */

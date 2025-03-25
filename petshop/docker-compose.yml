@@ -3,20 +3,20 @@ version: '3.8'
 services:
   db:
     image: postgres:latest # Utilizando a imagem do projeto criada no dockerfile
-    container_name: petshop # Definindo nome para o container da imagem
+    container_name: petshop-db # Definindo nome para o container da imagem
     restart: always
     environment: # Configurações do banco
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: petshop
     ports:
-      - "5432:5432" # Porta utilizada no banco
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   app: # Definições do container do banco de dados
     build: .
-    container_name: petshop-db
+    container_name: petshop
     depends_on:
       - db
     environment:

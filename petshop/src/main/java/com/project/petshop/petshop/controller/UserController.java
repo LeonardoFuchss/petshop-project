@@ -13,6 +13,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -89,7 +91,7 @@ public class UserController {
     })
     public ResponseEntity<Optional<User>> findById(@PathVariable Long id) {
         Optional<User> user = userService.findById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        return ResponseEntity.ok().body(user);
     }
 
 

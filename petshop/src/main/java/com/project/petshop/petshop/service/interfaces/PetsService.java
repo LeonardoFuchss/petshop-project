@@ -10,7 +10,7 @@ public interface PetsService {
 
     public Pets save(PetsDto petsDto);
     public List<Pets> findAll();
-    public List<Pets> findByClientName(String clientName);
+    public Optional<Pets> findByClientName(String clientName);
     public Optional<Pets> findById(Long id);
     public void delete(Long id);
 }

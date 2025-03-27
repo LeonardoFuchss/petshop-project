@@ -23,14 +23,14 @@ public class AddressServiceImpl implements AddressService {
 
 
     @Override
-    public void save(AddressDto addressDto) { /* Registra um novo endereço no banco de dados */
+    public Address save(AddressDto addressDto) { /* Registra um novo endereço no banco de dados */
         Address address = addressMapper.toEntity(addressDto); /* Mapeamento de DTO para entidade */
-
         Optional<Address> addressFindByUser = addressRepository.findByUser(address.getUser()); /* Busca um endereço com base no usuário */
+
         if (addressFindByUser.isPresent()) { /* Verifica se o endereço já existe. */
             throw new AddressAlreadyExist("Address already exist");
         } else {
-            addressRepository.save(address); /* Persiste um novo endereço no banco de dados */
+           return addressRepository.save(address); /* Persiste um novo endereço no banco de dados */
         }
     }
 

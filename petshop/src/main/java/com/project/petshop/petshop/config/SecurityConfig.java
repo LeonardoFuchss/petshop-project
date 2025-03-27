@@ -44,15 +44,13 @@ public class SecurityConfig {
                                 "/webjars/**" // Dependências do Swagger
                         ).permitAll();
                         auth.requestMatchers("/swagger-resources/**").permitAll();
-                        auth.requestMatchers("/users/authenticate").permitAll();
-                        auth.requestMatchers("/users/register").permitAll();
-                        auth.requestMatchers("/users/save").permitAll(); /* !!!! Verificar restrição de primeiro acesso */
-                        auth.requestMatchers("/users/**").hasAnyRole("ADMIN", "CLIENT");
+                        auth.requestMatchers("/users/delete/**").permitAll();
+                        auth.requestMatchers("/users/**").permitAll();
                         auth.requestMatchers("/address/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/contact/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/breed/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/pets/**").hasAnyRole("ADMIN", "CLIENT");
-                        auth.requestMatchers("/appointment/**").hasRole("ADMIN"); /* Limita acesso a admin */; /* Libera acesso ao público */
+                        auth.requestMatchers("/appointment/**").permitAll(); /* Limita acesso a admin */; /* Libera acesso ao público */
                         auth.anyRequest().authenticated();
                     })
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) /* Adiciona o filtro JWT antes do filtro padrão de autenticação */

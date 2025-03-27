@@ -34,13 +34,10 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     @Autowired
     private UserMapper userMapper;
-
     @Autowired
     private PasswordEncoder passwordEncoder; /* Para criptografar a senha. */
-
     @Autowired
     private JwtService jwtService;
-
     private LocalDateTime now = LocalDateTime.now();
     @Autowired
     private RegisterMapper registerMapper;
@@ -89,7 +86,7 @@ public class UserServiceImpl implements UserService {
         if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) { /* Se o role for admin, retorna o usuário */
             return Optional.of(user);
         } else {
-            if (Objects.equals(user.getUserCpf(), userDetails.getUsername())) { /* Caso contrário, verifica se o usuário autenticado é igual ao usuário no banco de dados e retorna o usuário. */
+            if (Objects.equals(user.getUserCpf(), userDetails.getUsername())) { /* Caso contrário, verifica se o usuário autenticado é igual ao usuário no banco de dados e retorna o usuário. (userName é o userCpf definido na autenticação) */
                 return Optional.of(user);
             } else {
                 throw new UnauthorizedException("You are not allowed to access this user.");
@@ -105,10 +102,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long id) {
         Optional<User> user = userRepository.findById(id); /* Busca um usuário com base no seu identificador */
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         if (user.isEmpty()) { /* Verifica se a consulta retornou vazia */
             throw new UserNotFoundException("User not found");
         }
-        user.ifPresent(value -> userRepository.delete(value)); /* Se retornou um usuário, deleta ele do banco de dados. */
+
+        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+            user.ifPresent(userRepository::delete);
+        } else if (userDetails.getUsername().equals(user.get().getUserCpf())) {
+            user.ifPresent(userRepository::delete);
+        } else {
+            throw new UnauthorizedException("You are not allowed to delete this user.");
+        }
     }
 
     @Override

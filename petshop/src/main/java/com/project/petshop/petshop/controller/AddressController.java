@@ -29,9 +29,9 @@ public class AddressController {
             @ApiResponse(responseCode = "409", description = "Erro em caso de conflito."),
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
-    public ResponseEntity<Void> save(@Valid @RequestBody AddressDto addressDto) {
-        addressService.save(addressDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Address> save(@Valid @RequestBody AddressDto addressDto) {
+        Address address = addressService.save(addressDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(address);
     }
 
 

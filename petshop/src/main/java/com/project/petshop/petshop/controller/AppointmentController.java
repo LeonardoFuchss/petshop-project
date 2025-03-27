@@ -28,9 +28,9 @@ public class AppointmentController {
             @ApiResponse(responseCode = "409", description = "Erro em caso de conflito."),
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
-    public ResponseEntity<Void> save (@Valid @RequestBody AppointmentDto appointmentDto) {
-        appointmentService.save(appointmentDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Appointment> save (@Valid @RequestBody AppointmentDto appointmentDto) {
+        Appointment appointment = appointmentService.save(appointmentDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(appointment);
     }
 
 

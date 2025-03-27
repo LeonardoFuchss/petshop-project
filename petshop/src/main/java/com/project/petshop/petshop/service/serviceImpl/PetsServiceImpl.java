@@ -34,31 +34,35 @@ public class PetsServiceImpl implements PetsService {
 
         Pets pets = petsMapper.toEntity(petsDto); /* Mapeamento de DTO para entidade */
 
-        List<Pets> petClientFind = petsRepository.findByClientName(pets.getClientName()); /* Busca cliente pelo nome */
-        List<Pets> pet = petsRepository.findByDogName(pets.getDogName()); /* Busca pet pelo nome */
+        Optional<Pets> petOfClientFind = petsRepository.findByClientName(pets.getClientName()); /* Busca pet pelo nome do cliente */
+        Optional<Pets> petName = petsRepository.findByDogName(pets.getDogName()); /* Busca pet pelo nome */
 
-        if (petClientFind.isEmpty() && pet.isEmpty()) { /* Se não existir um usuário e nem um pet salvo, persiste um novo pet no banco de dados */
+        if (petName.isPresent() && petOfClientFind.isPresent()) {
+            throw new PetsAlreadyExist("Pets already exist");
+        } else if (petOfClientFind.isEmpty()) {
             petsRepository.save(pets);
-        } else if (!petClientFind.isEmpty() && pet.isEmpty()) { /* Se o usuário existir, mas o pet ainda não, persiste um novo pet no banco de dados. */
-            petsRepository.save(pets);
-        } else {
-            throw new PetsAlreadyExist("Pets already exist"); /* Se o usuário existir e o pet também, lança a exceção de conflito. */
         }
         return pets;
     }
 
     @Override
     public List<Pets> findAll() {
+        UserDetails userAuth = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<Pets> petsList = petsRepository.findAll(); /* Busca uma lista de pets */
+
         if (petsList.isEmpty()) { /* Verifica se a lista retornou vazia */
             throw new PetsNotFound("No pet record was found.");
         }
-        return petsRepository.findAll();
+        if (userAuth.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+            return petsRepository.findAll();
+        } else {
+            throw new UnauthorizedException("You are not allowed to view all users. Search for your pet.");
+        }
     }
 
     @Override
-    public List<Pets> findByClientName(String clientName) { /* Busca pet pelo nome do usuário */
-        List<Pets> pet = petsRepository.findByClientName(clientName);
+    public Optional<Pets> findByClientName(String clientName) { /* Busca pet pelo nome do usuário */
+        Optional<Pets> pet = petsRepository.findByClientName(clientName);
         if (pet.isEmpty()) { /* Verifica se a consulta retornou vazia */
             throw new PetsNotFound("No pet record was found.");
         }
@@ -67,19 +71,19 @@ public class PetsServiceImpl implements PetsService {
 
     @Override
     public Optional<Pets> findById(Long id) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Pets> pets = petsRepository.findById(id);
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); /* Busca o usuário autenticado no contexto do spring. */
+        Optional<Pets> pets = petsRepository.findById(id); /* Busca o pet pelo id informado */
 
-        if (pets.isEmpty()) {
+        if (pets.isEmpty()) { /* Retorna erro se estiver vazio */
             throw new PetsNotFound("No pet record was found.");
         }
-        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) { /* Returna o usuário buscado pelo id se o role do usuário autenticado for admin */
             return pets;
         }
-        Optional<User> user = userRepository.findById(pets.get().getClient().getId());
+        Optional<User> user = userRepository.findById(pets.get().getClient().getId()); /* Busca o usuário a partir do pet encontrado */
 
-        if (Objects.equals(userDetails.getUsername(), user.get().getUserCpf())) {
-            return pets;
+        if (Objects.equals(userDetails.getUsername(), user.get().getUserCpf())) { /* Verifica se o usuário autenticado é igual ao usuário dono do pet. */
+            return pets; /* Se for, ele poderá visualizar */
         } else {
             throw new UnauthorizedException("You do not have permission to access this resource");
         }
@@ -87,10 +91,22 @@ public class PetsServiceImpl implements PetsService {
 
     @Override
     public void delete(Long id) { /* Deleta um pet com base no seu identificador */
+        UserDetails userAuth = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Pets> pets = petsRepository.findById(id); /* Busca um pet com base no seu identificador */
+
         if (pets.isEmpty()) { /* verifica se a consulta retornou vazia */
             throw new PetsNotFound("No pet record was found.");
         }
-        pets.ifPresent(value -> petsRepository.delete(value)); /* Se o pet existir, deleta. */
+
+        if (userAuth.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
+            pets.ifPresent(value -> petsRepository.delete(value));
+        }
+
+        Optional<User> user = userRepository.findById(pets.get().getClient().getId());
+        if (userAuth.getUsername().equals(user.get().getUserCpf())) {
+            petsRepository.delete(pets.get());
+        } else {
+            throw new UnauthorizedException("You do not have permission to access this resource");
+        }
     }
 }

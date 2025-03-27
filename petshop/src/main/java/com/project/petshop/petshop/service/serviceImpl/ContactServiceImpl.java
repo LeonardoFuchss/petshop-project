@@ -22,15 +22,14 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public void save(ContactDto contactDto) { /* Persiste um novo contato */
+    public Contact save(ContactDto contactDto) { /* Persiste um novo contato */
         Contact contact = contactMapper.toEntity(contactDto); /* Mapeamento de DTO para entidade */
         Contact contactFind = contactRepository.findByValue(contact.getValue()); /* Consulta que busca o contato no banco de dados */
         if (contactFind == null) { /* Verifica se o contato não existe */
-            contactRepository.save(contact); /* Persiste no banco de dados */
+            return contactRepository.save(contact); /* Persiste no banco de dados */
         } else {
             throw new ContactAlreadyExist("Contact already exist");
         }
-
     }
     @Override
     public List<Contact> findAll() { /* Busca uma lista de contatos */

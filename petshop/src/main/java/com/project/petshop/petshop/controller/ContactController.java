@@ -29,9 +29,9 @@ public class ContactController {
             @ApiResponse(responseCode = "409", description = "Erro em caso de conflito."),
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
-    public ResponseEntity<Void> addContact(@Valid @RequestBody ContactDto contactDto) {
-        contactService.save(contactDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<Contact> addContact(@Valid @RequestBody ContactDto contactDto) {
+            Contact contact = contactService.save(contactDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(contact);
     }
 
 

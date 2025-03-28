@@ -13,4 +13,5 @@ public interface PetsService {
     public Optional<Pets> findByClientName(String clientName);
     public Optional<Pets> findById(Long id);
     public void delete(Long id);
+    public Pets update(PetsDto petsDto);
 }

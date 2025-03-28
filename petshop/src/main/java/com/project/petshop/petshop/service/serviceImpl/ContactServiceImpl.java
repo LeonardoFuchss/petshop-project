@@ -7,18 +7,19 @@ import com.project.petshop.petshop.mapper.ContactMapper;
 import com.project.petshop.petshop.domain.entities.Contact;
 import com.project.petshop.petshop.repository.ContactRepository;
 import com.project.petshop.petshop.service.interfaces.ContactService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 @Service
+@AllArgsConstructor
 public class ContactServiceImpl implements ContactService {
 
-    @Autowired
-    private ContactRepository contactRepository;
-    @Autowired
-    private ContactMapper contactMapper;
+
+    private final ContactRepository contactRepository;
+    private final ContactMapper contactMapper;
 
 
     @Override
@@ -31,32 +32,28 @@ public class ContactServiceImpl implements ContactService {
             throw new ContactAlreadyExist("Contact already exist");
         }
     }
+
+
     @Override
     public List<Contact> findAll() { /* Busca uma lista de contatos */
         List<Contact> contacts = contactRepository.findAll();
         if (contacts.isEmpty()) { /* Verifica se a lista está vazia */
             throw new ContactNotFound("Contacts not found");
         }
-        return contactRepository.findAll();
+        return contacts;
     }
+
 
     @Override
     public Optional<Contact> findById(Long id) { /* Busca um contato específico com base no seu ID */
-        Optional<Contact> contact = contactRepository.findById(id);
-        if (contact.isEmpty()) { /* Verifica se a consulta retornou vazia */
-            throw new ContactNotFound("Contact not found");
-        } else {
-            return contactRepository.findById(id);
-        }
+        return  Optional.ofNullable(contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found")));
     }
+
 
     @Override
     public void delete(Long id) { /* Deleta um usuário com base no seu ID */
-       Optional<Contact> contact = contactRepository.findById(id); /* Busca um usuário com base no ID */
-       if (contact.isPresent()) { /* Verifica se o usuário existe. */
-           contactRepository.delete(contact.get()); /* Deleta o usuário do banco de dados. */
-       } else {
-           throw new ContactNotFound("Contact not found");
-       }
+       Optional<Contact> contact = Optional.ofNullable(contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found"))); /* Busca um usuário com base no ID */
+       Contact contactDelete = contact.get();
+       contactRepository.delete(contactDelete); /* Deleta o usuário do banco de dados. */
     }
 }

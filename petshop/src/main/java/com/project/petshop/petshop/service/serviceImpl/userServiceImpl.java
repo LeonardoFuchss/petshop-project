@@ -1,5 +1,6 @@
 package com.project.petshop.petshop.service.serviceImpl;
 
+import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.AuthDto;
 import com.project.petshop.petshop.dto.RegisterDto;
 import com.project.petshop.petshop.dto.UserDto;
@@ -13,6 +14,7 @@ import com.project.petshop.petshop.domain.AccessToken;
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,30 +29,27 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
-
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private PasswordEncoder passwordEncoder; /* Para criptografar a senha. */
-    @Autowired
-    private JwtService jwtService;
-    private LocalDateTime now = LocalDateTime.now();
-    @Autowired
-    private RegisterMapper registerMapper;
+
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder; /* Para criptografar a senha. */
+    private final JwtService jwtService;
+    private final LocalDateTime now = LocalDateTime.now();
+    private final RegisterMapper registerMapper;
 
 
     @Override
     public User save(UserDto userdTO) {
-        if (userRepository.findByUserCpf(userdTO.getUserCpf()).isPresent()) { /* Verifica se o usuário existe */
+        Optional<User> userFound = userRepository.findByUserCpf(userdTO.getUserCpf());
+        Optional<User> userFoundByName = userRepository.findByFullName(userdTO.getFullName());
+        if (userFound.isPresent() || userFoundByName.isPresent()) { /* Verifica se o usuário existe */
             throw new UserAlreadyException("User already exists");
         }
         User user = userMapper.toEntity(userdTO); /* Mapeamento para entidade */
         user.setSignUpDate(now);
-
         encodePassword(user); /* Chama a função abaixo que criptografa a senha */
         userRepository.save(user); /* Persiste a entidade mapeada no banco de dados */
         return user;
@@ -67,15 +66,18 @@ public class UserServiceImpl implements UserService {
     public List<User> findAll() {
         List<User> users = userRepository.findAll(); /* Busca uma lista de usuários no banco de dados */
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"));
+
         if (users.isEmpty()) {
             throw new UserNotFoundException("Users not found");
         }
-        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) { /* Verifica se a lista está vazia. */
+        if (isAdmin) {
             return users;
         } else {
-            throw new UnauthorizedException("You do not have permission to access this resource");
+            throw new UnauthorizedException("You are not an admin");
         }
     }
+
 
     @Override
     public Optional<User> findById(Long id) { /* Busca pelo id (Apenas admins que visualizam qualquer cadastro) */
@@ -94,6 +96,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
     @Override
     public Optional<User> findByUserCpf(String cpf) {
         return userRepository.findByUserCpf(cpf);
@@ -107,7 +110,6 @@ public class UserServiceImpl implements UserService {
         if (user.isEmpty()) { /* Verifica se a consulta retornou vazia */
             throw new UserNotFoundException("User not found");
         }
-
         if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
             user.ifPresent(userRepository::delete);
         } else if (userDetails.getUsername().equals(user.get().getUserCpf())) {
@@ -116,6 +118,7 @@ public class UserServiceImpl implements UserService {
             throw new UnauthorizedException("You are not allowed to delete this user.");
         }
     }
+
 
     @Override
     public AccessToken authenticate(String cpf, String password) { /* Autenticação do usuário retornando um token de acesso (Recebe as credenciais no parâmetro) */
@@ -131,6 +134,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
     @Override
     public User register(RegisterDto registerDto) {
         if (userRepository.findByUserCpf(registerDto.getUserCpf()).isPresent()) { /* Verifica se o usuário existe */
@@ -144,6 +148,7 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+
     @Override
     public UserDetails getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -151,5 +156,32 @@ public class UserServiceImpl implements UserService {
             return (UserDetails) authentication.getPrincipal();
         }
         return null;
+    }
+
+
+    @Override
+    public User updateUser(UserDto userDto) { /* Atualização de usuário */
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); /* Busca o usuário autenticado no contexto do spring. */
+        return saveUpdateUser(userDetails, userDto);
+    }
+
+    private boolean isAuthorized(UserDetails userDetails, String cpf) { /* Verifica se o usuário está autorizado. */
+        return userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")) /* Se for admin */
+                || userDetails.getUsername().equals(cpf); /* Ou se o userName do token bater com cpf do usuário que for alterado. (userName do token é o cpf)*/
+    }
+    private User saveUpdateUser(UserDetails user, UserDto userDto) { /* Salva usuário no banco */
+        if (isAuthorized(user, userDto.getUserCpf())) { /* se for autorizado */
+            Optional<User> userFound = userRepository.findByUserCpf(userDto.getUserCpf());
+            if (userFound.isPresent()) {
+                userFound.get().setUserCpf(userDto.getUserCpf());
+                userFound.get().setPassword(userDto.getPassword());
+                userFound.get().setFullName(userDto.getFullName());
+                return userRepository.save(userFound.get());
+            } else {
+                throw new UserNotFoundException("User not found");
+            }
+        } else {
+            throw new UnauthorizedException("You are not allowed to access this user.");
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.project.petshop.petshop.mapper.BreedMapper;
 import com.project.petshop.petshop.domain.entities.Breed;
 import com.project.petshop.petshop.repository.BreedRepository;
 import com.project.petshop.petshop.service.interfaces.BreedService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,12 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class BreedServiceImpl implements BreedService {
 
-    @Autowired
-    private BreedRepository breedRepository;
-    @Autowired
-    private BreedMapper breedMapper;
+    private final BreedRepository breedRepository;
+    private final BreedMapper breedMapper;
 
     @Override
     public Breed save(BreedDto breedDto) {
@@ -32,31 +32,28 @@ public class BreedServiceImpl implements BreedService {
         return breed;
     }
 
+
     @Override
     public List<Breed> findAll() { /* Busca uma lista de raças */
         List<Breed> breeds = breedRepository.findAll();
         if (breeds.isEmpty()) { /* Verifica se a lista está vazia */
             throw new BreedNotFound("Breeds not found");
         }
-        return breedRepository.findAll();
+        return breeds;
     }
+
+
 
     @Override
     public Optional<Breed> findById(Long id) { /* Busca uma raça com base no seu identificador */
-        Optional<Breed> breed = breedRepository.findById(id);
-        if (breed.isEmpty()) { /* Verifica se a consulta retornou vazia. */
-            throw new BreedNotFound("Breeds not found");
-        }
-        return breedRepository.findById(id);
+        return Optional.ofNullable(breedRepository.findById(id).orElseThrow(() -> new BreedNotFound("Breed not found")));
     }
+
 
     @Override
     public void delete(Long id) { /* Deleta uma raça com base no seu identificador */
-        Optional<Breed> breedFind = breedRepository.findById(id); /* Busca uma raça com base no ID */
-        if (breedFind.isPresent()) { /* Verifica se a consulta retornou vazia. */
-            breedRepository.delete(breedFind.get()); /* Deleta a raça do banco de dados */
-        } else {
-            throw new BreedNotFound("Breed not found");
-        }
+        Breed breedFind = (breedRepository.findById(id).orElseThrow(() -> new BreedNotFound("Breed not found"))); /* Busca uma raça com base no ID */
+        breedRepository.delete(breedFind); /* Deleta a raça do banco de dados */
+
     }
 }

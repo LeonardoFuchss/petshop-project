@@ -107,4 +107,11 @@ public class UserController {
         userService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+
+    @PostMapping("/update")
+    public ResponseEntity<User> updateUser(@Valid @RequestBody UserDto userDto) {
+        User userSaved = userService.updateUser(userDto);
+        return ResponseEntity.ok(userSaved);
+    }
 }

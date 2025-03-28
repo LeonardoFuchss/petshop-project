@@ -5,11 +5,13 @@ import com.project.petshop.petshop.dto.AppointmentDto;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentExist;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentNotFound;
 import com.project.petshop.petshop.exceptions.user.UnauthorizedException;
+import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
 import com.project.petshop.petshop.mapper.AppointmentMapper;
 import com.project.petshop.petshop.domain.entities.Appointment;
 import com.project.petshop.petshop.repository.AppointmentRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.AppointmentService;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,33 +21,33 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-    @Autowired
-    private AppointmentMapper appointmentMapper;
-    @Autowired
-    private UserRepository userRepository;
+
+    private final AppointmentRepository appointmentRepository;
+    private final AppointmentMapper appointmentMapper;
+    private final UserRepository userRepository;
 
     @Override
     public Appointment save(AppointmentDto appointmentDto) {
         Appointment appointment = appointmentMapper.toEntity(appointmentDto); /* Mapeamento de DTO para entidade */
-        Appointment appointmentExist = appointmentRepository.findByDate(appointmentDto.getDate()); /* Busca se a data já possui um agendamento */
+        Optional<Appointment> appointmentExist = appointmentRepository.findByDate(appointmentDto.getDate()); /* Busca se a data já possui um agendamento */
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); /* Busca usuário autenticado no contexto do spring. */
-        Optional<User> user = userRepository.findById(appointment.getPet().getClient().getId());
-
-        if (appointmentExist != null) { /* Se já existe um agendamento para essa data, lança a exceção */
-            throw new AppointmentExist("Appointment already exist in this date");
+        User user = userRepository.findById(appointment.getPet().getClient().getId()).orElseThrow(
+                () -> new UserNotFoundException("User not found")
+        );
+        if (appointmentExist.isPresent()) {
+            throw new AppointmentExist("The Appointment already exists.");
         }
-        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) { /* Se o role do usuário autenticado for "ADMIN", permite salvar no banco */
-            return appointmentRepository.save(appointment);
-        } else if (userDetails.getUsername().equals(user.get().getUserCpf())) { /* Se o nome do usuário autenticado (cpf) for igual ao cliente dono do pet, permite salvar */
-            return appointmentRepository.save(appointment);
-        } else { /* Caso o contrário, lança exceção de permissão */
-            throw new UnauthorizedException("You do not have permission to add an appointment");
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAuthorized = userDetails.getUsername().equals(user.getUserCpf());
+        if (!isAdmin && !isAuthorized) {
+            throw new UnauthorizedException("You do not have permission to add an appointment.");
         }
+        return appointmentRepository.save(appointment);
     }
+
 
     @Override
     public List<Appointment> findAll() { /* Busca uma lista de agendamentos */
@@ -62,38 +64,32 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+
     @Override
     public Appointment findById(Long id) { /* Busca um agendamento com base no identificador */
-        Optional<Appointment> appointmentOptional = appointmentRepository.findById(id);
+        Optional<Appointment> appointmentOptional = Optional.ofNullable(appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFound("Appointment not found")));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAuthorized = userDetails.getUsername().equals(appointmentOptional.get().getClientName());
 
-        if (appointmentOptional.isEmpty()) {
-            throw new AppointmentNotFound("Appointments not found");
+        if (!isAdmin && !isAuthorized) {
+            throw new UnauthorizedException("You do not have permission to view an appointment.");
         }
-
-        /* Lógica para permitir que apenas o admin possa visualizar qualquer agendamento e o cliente possa visualizar apenas o seu. */
-        if (userDetails.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"))) {
-            return appointmentOptional.get();
-        }
-        if (userDetails.getUsername().equals(appointmentOptional.get().getClientName())) {
-            return appointmentOptional.get();
-        } else {
-            throw new UnauthorizedException("You do not have permission to found this appointment");
-        }
+        return appointmentOptional.get();
     }
+
 
     @Override
     public void delete(Long id) { /* Deleta um agendamento com base no seu ID */
         Appointment appointment = findById(id);
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = userRepository.findById(appointment.getPet().getClient().getId());
+        Optional<User> user = Optional.ofNullable(userRepository.findById(appointment.getPet().getClient().getId()).orElseThrow(() -> new UserNotFoundException("User not found")));
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAuthorized = userDetails.getUsername().equals(appointment.getClientName());
 
-        if (userDetails.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"))) {
-            appointmentRepository.delete(appointment);
-        } else if (userDetails.getUsername().equals(user.get().getUserCpf())) {
-            appointmentRepository.delete(appointment);
-        } else {
-            throw new UnauthorizedException("You do not have permission to delete this appointment");
+        if (!isAdmin && !isAuthorized) {
+            throw new UnauthorizedException("You do not have permission to delete an appointment.");
         }
+        appointmentRepository.delete(appointment);
     }
 }

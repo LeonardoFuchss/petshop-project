@@ -19,4 +19,5 @@ public interface UserService {
     AccessToken authenticate(String cpf, String password);
     User register(RegisterDto registerDto);
     UserDetails getAuthenticatedUser();
+    User updateUser(UserDto userDto);
 }

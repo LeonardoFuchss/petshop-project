@@ -70,4 +70,10 @@ public class PetsController {
         petsService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/update")
+    public ResponseEntity<Pets> update(@Valid @RequestBody PetsDto petsDto) {
+        Pets petsSaved = petsService.update(petsDto);
+        return ResponseEntity.ok(petsSaved);
+    }
 }

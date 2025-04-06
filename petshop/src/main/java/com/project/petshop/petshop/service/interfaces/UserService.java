@@ -14,10 +14,8 @@ public interface UserService {
     User save(UserDto userdTO);
     List<User> findAll();
     Optional<User> findById(Long id);
-    Optional<User> findByUserCpf(String cpf);
     void delete(Long id);
     AccessToken authenticate(String cpf, String password);
     User register(RegisterDto registerDto);
-    UserDetails getAuthenticatedUser();
     User updateUser(UserDto userDto);
 }

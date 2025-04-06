@@ -18,9 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Optional;
-
-
-
 /*
 * Filtro responsável por interceptar todas as requisições e validar o token.
 * Ele extrai o token do cabeçalho da requisição, verifica sua validade e autentica o usuário.

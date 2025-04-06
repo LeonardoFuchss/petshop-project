@@ -32,42 +32,57 @@ import java.util.Optional;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder; /* Para criptografar a senha. */
     private final JwtService jwtService;
-    private final LocalDateTime now = LocalDateTime.now();
+    private final LocalDateTime now = LocalDateTime.now(); /* Data e hora atual */
     private final RegisterMapper registerMapper;
 
 
+    /**
+     * Persiste um novo usuário no banco de dados.
+     * .
+     * Recebe um dto no parâmetro e com base no CPF e o NOME verifica se o usuário existe.
+     * Mapeamento de DTO para ENTIDADE.
+     * Seta a data e hora de login com base na data e hora atual (now: Definido no atributo da classe).
+     * Criptografa a senha do usuário utilizando o método criado para criptografar (encodePassword).
+     * Chama o save do userRepository para salvar um novo usuário.
+     */
     @Override
     public User save(UserDto userdTO) {
         Optional<User> userFound = userRepository.findByUserCpf(userdTO.getUserCpf());
         Optional<User> userFoundByName = userRepository.findByFullName(userdTO.getFullName());
-        if (userFound.isPresent() || userFoundByName.isPresent()) { /* Verifica se o usuário existe */
+        if (userFound.isPresent() || userFoundByName.isPresent()) {
             throw new UserAlreadyException("User already exists");
         }
-        User user = userMapper.toEntity(userdTO); /* Mapeamento para entidade */
+        User user = userMapper.toEntity(userdTO);
         user.setSignUpDate(now);
-        encodePassword(user); /* Chama a função abaixo que criptografa a senha */
-        userRepository.save(user); /* Persiste a entidade mapeada no banco de dados */
+        encodePassword(user);
+        userRepository.save(user);
         return user;
     }
 
-    private void encodePassword(User user) { /* Recebe um usuário e criptografa a senha. */
-        String actualPassword = user.getPassword(); /* Pega a senha atual do usuário */
-        String encodedPassword = passwordEncoder.encode(actualPassword); /* Coloca ela como criptografada. */
-        user.setPassword(encodedPassword); /* Atualiza a senha do usuário. */
+    /**
+     * Criptografando a senha do usuário Utilizando passwordEncoder
+     */
+    private void encodePassword(User user) {
+        String actualPassword = user.getPassword();
+        String encodedPassword = passwordEncoder.encode(actualPassword);
+        user.setPassword(encodedPassword);
     }
 
-
+    /**
+     * Retorna uma lista de todos os usuários do banco de dados.
+     * .
+     * Utilizamos UserDetails para buscar o usuário autenticado no contexto do spring.
+     * Variável boolean para verificar se o usuário autenticado possui role ADMIN. (Role necessário para ter permissão de visualizar todos os usuários)
+     */
     @Override
     public List<User> findAll() {
-        List<User> users = userRepository.findAll(); /* Busca uma lista de usuários no banco de dados */
+        List<User> users = userRepository.findAll();
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"));
-
         if (users.isEmpty()) {
             throw new UserNotFoundException("Users not found");
         }
@@ -78,17 +93,21 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
+    /**
+     * Busca um usuário com base no ID passado por parâmetro.
+     * .
+     * Utiliza UserDetails para recuperar o usuário autenticado no contexto do spring.
+     * Verifica se o Role do usuário autenticado é ROLE_ADMIN
+     * Verifica se o CPF do usuário é igual ao UserName do UserDetails (CPF é definido como user name)
+     */
     @Override
-    public Optional<User> findById(Long id) { /* Busca pelo id (Apenas admins que visualizam qualquer cadastro) */
-
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); /* Buscando usuário autenticado no contexto do spring. */
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found")); /* Buscando usuário no banco de dados */
-
-        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) { /* Se o role for admin, retorna o usuário */
+    public Optional<User> findById(Long id) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
+        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
             return Optional.of(user);
         } else {
-            if (Objects.equals(user.getUserCpf(), userDetails.getUsername())) { /* Caso contrário, verifica se o usuário autenticado é igual ao usuário no banco de dados e retorna o usuário. (userName é o userCpf definido na autenticação) */
+            if (Objects.equals(user.getUserCpf(), userDetails.getUsername())) {
                 return Optional.of(user);
             } else {
                 throw new UnauthorizedException("You are not allowed to access this user.");
@@ -96,20 +115,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
-    @Override
-    public Optional<User> findByUserCpf(String cpf) {
-        return userRepository.findByUserCpf(cpf);
-    }
-
+    /**
+     * Deleta o usuário recuperado pelo ID.
+     * UserDetails para recuperar usuário autenticado e verificar role de permissão
+     *
+     */
     @Override
     public void delete(Long id) {
-        Optional<User> user = userRepository.findById(id); /* Busca um usuário com base no seu identificador */
+        Optional<User> user = Optional.ofNullable(userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found")));
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (user.isEmpty()) { /* Verifica se a consulta retornou vazia */
-            throw new UserNotFoundException("User not found");
-        }
         if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
             user.ifPresent(userRepository::delete);
         } else if (userDetails.getUsername().equals(user.get().getUserCpf())) {
@@ -119,56 +133,68 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
+    /**
+     * Autenticação de usuário
+     * Verifica se o usuário existe pelo CPF
+     * Verifica se a senha bate com a senha criptografada no banco (matches)
+     * Retorna um AccessToken gerado através do JwtService ((string) utilizado para autenticar usuário).
+     */
     @Override
-    public AccessToken authenticate(String cpf, String password) { /* Autenticação do usuário retornando um token de acesso (Recebe as credenciais no parâmetro) */
-        Optional<User> user = userRepository.findByUserCpf(cpf); /* Busca o usuário pelo seu cpf. */
-        if (user.isEmpty()) { /* Verifica se o usuário existe. */
+    public AccessToken authenticate(String cpf, String password) {
+        Optional<User> user = userRepository.findByUserCpf(cpf);
+        if (user.isEmpty()) {
             throw new UserNotFoundException("Invalid password or invalid CPF. try again");
         }
-        boolean matches = passwordEncoder.matches(password, user.get().getPassword()); /* Variável que verifica se a senha passada por parâmetro é igual a senha do usuário no banco. */
-        if (matches) { /* se for igual, retorna um token com o método que gera o token. */
+        boolean matches = passwordEncoder.matches(password, user.get().getPassword());
+        if (matches) {
             return jwtService.generateToken(user.get());
         } else {
-            return null; /* se não for igual, retorna null*/
+            return null;
         }
     }
 
-
+    /**
+     * Persiste um novo usuário no banco de dados.
+     * .
+     * Recebe um dto no parâmetro e com base no CPF e o NOME verifica se o usuário existe.
+     * Mapeamento de DTO para ENTIDADE.
+     * Seta a data e hora de login com base na data e hora atual (now: Definido no atributo da classe).
+     * Criptografa a senha do usuário utilizando o método criado para criptografar (encodePassword).
+     * Chama o save do userRepository para salvar um novo usuário.
+     */
     @Override
     public User register(RegisterDto registerDto) {
-        if (userRepository.findByUserCpf(registerDto.getUserCpf()).isPresent()) { /* Verifica se o usuário existe */
+        if (userRepository.findByUserCpf(registerDto.getUserCpf()).isPresent()) {
             throw new UserAlreadyException("User already exists");
         }
-        User user = registerMapper.toEntity(registerDto); /* Mapeamento para entidade */
+        User user = registerMapper.toEntity(registerDto);
         user.setSignUpDate(now);
-
-        encodePassword(user); /* Chama a função abaixo que criptografa a senha */
-        userRepository.save(user); /* Persiste a entidade mapeada no banco de dados */
+        encodePassword(user);
+        userRepository.save(user);
         return user;
     }
 
-
+    /**
+     * Atualiza dados do usuário.
+     * Recupera usuário autenticado no contexto do spring.
+     */
     @Override
-    public UserDetails getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
-            return (UserDetails) authentication.getPrincipal();
-        }
-        return null;
-    }
-
-
-    @Override
-    public User updateUser(UserDto userDto) { /* Atualização de usuário */
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); /* Busca o usuário autenticado no contexto do spring. */
+    public User updateUser(UserDto userDto) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return saveUpdateUser(userDetails, userDto);
     }
 
-    private boolean isAuthorized(UserDetails userDetails, String cpf) { /* Verifica se o usuário está autorizado. */
-        return userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")) /* Se for admin */
-                || userDetails.getUsername().equals(cpf); /* Ou se o userName do token bater com cpf do usuário que for alterado. (userName do token é o cpf)*/
+    /**
+     * Verifica se o usuário possui role admin ou se o CPF é igual o utilizado na autenticação.
+     */
+    private boolean isAuthorized(UserDetails userDetails, String cpf) {
+        return userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))
+                || userDetails.getUsername().equals(cpf);
     }
+
+    /**
+     * Lógica para atualizar os dados do usuário.
+     */
     private User saveUpdateUser(UserDetails user, UserDto userDto) { /* Salva usuário no banco */
         if (isAuthorized(user, userDto.getUserCpf())) { /* se for autorizado */
             Optional<User> userFound = userRepository.findByUserCpf(userDto.getUserCpf());

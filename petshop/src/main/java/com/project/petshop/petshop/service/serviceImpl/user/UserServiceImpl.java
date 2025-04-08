@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyException("User already exists");
         }
         User user = userMapper.toEntity(userdTO);
-        user.setSignUpDate(LocalDateTime.now());
         encodePassword(user);
         userRepository.save(user);
         return user;

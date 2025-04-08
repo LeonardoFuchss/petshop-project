@@ -1,38 +1,64 @@
 package com.project.petshop.petshop.service.serviceImpl.user;
 
 import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.UserDto;
-import com.project.petshop.petshop.service.interfaces.user.UserService;
-import jakarta.persistence.EntityManager;
+import com.project.petshop.petshop.mapper.UserMapper;
+import com.project.petshop.petshop.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-
+import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
-@DataJpaTest
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
+
 @ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class) /* Para habilitar os mocks com mockito. */
 class UserServiceImplTest {
 
-    @Autowired
-    UserService userService;
-    @Autowired
-    EntityManager entityManager;
 
-    @Test
-    @DisplayName("User created successfully")
-    void saveSuccess() {
-        UserDto userDto = new UserDto(
-                "05416199008",
-                "Leonardo Dos Santos Fuchs",
-                "testeSenha10",
-                "2025-05-08T10:57:27.8994019");
+    /**
+     * "Mock" é usado para injetar os métodos no qual o 'userServiceImpl' possui dependência.
+     * InjectMocks serve para injetar os mocks definidos, dentro da classe userServiceImpl.
+     */
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private UserMapper userMapper;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @InjectMocks
+    private UserServiceImpl userServiceImpl;
 
-        User userSaved = userService.save(userDto);
-        assertEquals("Leonardo Dos Santos Fuchs", userSaved.getFullName());
-        User user = entityManager.find(User.class, userSaved.getId());
-        assertNotNull(user);
+
+    @Nested
+    class saveUser {
+        @Test
+        @DisplayName("User created successfully")
+        void shouldSaveUserWithSuccess() {
+            User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
+
+            doReturn(user).when(userRepository).save(any());
+            when(userMapper.toEntity(any(UserDto.class))).thenReturn(user);
+            when(passwordEncoder.encode(any())).thenReturn("senhaTeste10");
+
+            // Arrange
+            UserDto userDto = new UserDto("05416199008", "ADMIN", "Leonardo Dos Santos Fuchs", "testeSenha10");
+            // Act
+            User userSaved = userServiceImpl.save(userDto);
+
+            // Assert
+            assertNotNull(userSaved);
+            assertEquals("Leonardo Dos Santos Fuchs", userSaved.getFullName());
+        }
     }
 }

@@ -5,6 +5,8 @@ import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class UserMapper {
 
@@ -16,6 +18,7 @@ public class UserMapper {
                 .fullName(dto.getFullName())
                 .profile(profileEnum)
                 .password(dto.getPassword())
+                .signUpDate(LocalDateTime.now())
                 .build();
     }
 }

@@ -63,8 +63,8 @@ class AppointmentServiceImplTest {
             when(securityContext.getAuthentication()).thenReturn(authentication);
             when(authentication.getPrincipal()).thenReturn(userDetails);
             when(userDetails.getUsername()).thenReturn("05416199008");
-            when(userDetails.getAuthorities()).thenReturn()
 
+            SecurityContextHolder.setContext(securityContext);
 
             doReturn(appointment).when(appointmentRepository).save(any());
             when(appointmentMapper.toEntity(appointmentDto)).thenReturn(appointment);
@@ -74,7 +74,7 @@ class AppointmentServiceImplTest {
 
             Appointment savedAppointment = appointmentService.save(appointmentDto);
 
-            assertEquals("Banho e tosa",savedAppointment.getDescription());
+            assertEquals("Banho e tosa", savedAppointment.getDescription());
             assertNotNull(savedAppointment);
 
         }

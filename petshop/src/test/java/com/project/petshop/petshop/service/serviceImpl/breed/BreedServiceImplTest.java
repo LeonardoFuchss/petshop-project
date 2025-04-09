@@ -2,6 +2,7 @@ package com.project.petshop.petshop.service.serviceImpl.breed;
 
 import com.project.petshop.petshop.domain.entities.Breed;
 import com.project.petshop.petshop.dto.BreedDto;
+import com.project.petshop.petshop.exceptions.breed.BreedAlreadyExist;
 import com.project.petshop.petshop.mapper.BreedMapper;
 import com.project.petshop.petshop.repository.BreedRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +44,17 @@ class BreedServiceImplTest {
             Breed savedBreed = breedService.save(breedDto);
             assertNotNull(savedBreed);
             assertEquals("YorkShire", savedBreed.getDescription());
+        }
+        @Test
+        @DisplayName("Breed conflict")
+        void shouldShowConflictException() {
+            Breed breed = new Breed(1L, "YorkShire");
+            BreedDto breedDto = new BreedDto("YorkShire");
+
+            when(breedMapper.toEntity(breedDto)).thenReturn(breed);
+            when(breedRepository.findByDescription(breed.getDescription())).thenReturn(breed);
+
+            assertThrows(BreedAlreadyExist.class, () -> breedService.save(breedDto));
         }
     }
 }

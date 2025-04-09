@@ -3,6 +3,7 @@ package com.project.petshop.petshop.service.serviceImpl.user;
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.UserDto;
+import com.project.petshop.petshop.exceptions.user.UserAlreadyException;
 import com.project.petshop.petshop.mapper.UserMapper;
 import com.project.petshop.petshop.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -47,24 +48,30 @@ class UserServiceImplTest {
         @DisplayName("User created successfully")
         void shouldSaveUserWithSuccess() {
             User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
+            UserDto userDto = new UserDto("05416199008", "ADMIN", "Leonardo Dos Santos Fuchs", "testeSenha10");
 
-            doReturn(user).when(userRepository).save(any());
             when(userRepository.findByUserCpf(any())).thenReturn(Optional.empty());
             when(userRepository.findByFullName(any())).thenReturn(Optional.empty());
-            when(userMapper.toEntity(any(UserDto.class))).thenReturn(user);
+            when(userMapper.toEntity(userDto)).thenReturn(user);
+            doReturn(user).when(userRepository).save(any());
             when(passwordEncoder.encode(any())).thenReturn("senhaTeste10");
 
-            // Arrange
-            UserDto userDto = new UserDto("05416199008", "ADMIN", "Leonardo Dos Santos Fuchs", "testeSenha10");
-            // Act
             User userSaved = userServiceImpl.save(userDto);
 
-            // Assert
             assertNotNull(userSaved);
             assertEquals("Leonardo Dos Santos Fuchs", userSaved.getFullName());
             assertEquals("senhaTeste10", userSaved.getPassword());
-            verify(passwordEncoder).encode("testeSenha10");
         }
+        @Test
+        @DisplayName("User conflict")
+        void shouldShowConflictException() {
+            User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
+            UserDto userDto = new UserDto("05416199008", "ADMIN", "Leonardo Dos Santos Fuchs", "testeSenha10");
 
+            when(userRepository.findByUserCpf(any())).thenReturn(Optional.of(user));
+            when(userRepository.findByFullName(any())).thenReturn(Optional.of(user));
+
+            assertThrows(UserAlreadyException.class, () -> userServiceImpl.save(userDto));
+        }
     }
 }

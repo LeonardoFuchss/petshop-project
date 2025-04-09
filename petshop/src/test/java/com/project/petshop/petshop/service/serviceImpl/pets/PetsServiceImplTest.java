@@ -5,6 +5,7 @@ import com.project.petshop.petshop.domain.entities.Pets;
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.PetsDto;
+import com.project.petshop.petshop.exceptions.pets.PetsAlreadyExist;
 import com.project.petshop.petshop.mapper.PetsMapper;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
@@ -49,7 +50,6 @@ class PetsServiceImplTest {
             Pets pets = new Pets(1L, user, new Breed(1L, "yorkshire"), LocalDate.now(), "Leonardo Dos Santos Fuchs", "Beni", "yorkshire");
             PetsDto petsDto = new PetsDto(1L, 1L, LocalDate.now(), "Beni");
 
-            doReturn(pets).when(petsRepository).save(any());
             when(petsMapper.toEntity(any(PetsDto.class))).thenReturn(pets);
             when(petsRepository.save(any(Pets.class))).thenReturn(pets);
 
@@ -58,6 +58,20 @@ class PetsServiceImplTest {
 
             assertNotNull(petsSaved);
             assertEquals("Beni", petsSaved.getDogName());
+        }
+        @Test
+        @DisplayName("Pets conflict")
+        void shouldShowConflictException() {
+            User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
+            Pets pets = new Pets(1L, user, new Breed(1L, "yorkshire"), LocalDate.now(), "Leonardo Dos Santos Fuchs", "Beni", "yorkshire");
+            PetsDto petsDto = new PetsDto(1L, 1L, LocalDate.now(), "Beni");
+
+            when(petsMapper.toEntity(any(PetsDto.class))).thenReturn(pets);
+            when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+            when(petsRepository.findByClientNameAndDogName(user.getFullName(), pets.getDogName())).thenReturn(Optional.of(pets));
+
+            assertThrows(PetsAlreadyExist.class, () -> petsService.save(petsDto));
+
         }
     }
 }

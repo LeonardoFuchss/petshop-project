@@ -6,6 +6,7 @@ import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.domain.enums.TagContact;
 import com.project.petshop.petshop.domain.enums.TypeContact;
 import com.project.petshop.petshop.dto.ContactDto;
+import com.project.petshop.petshop.exceptions.contact.ContactAlreadyExist;
 import com.project.petshop.petshop.mapper.ContactMapper;
 import com.project.petshop.petshop.repository.ContactRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,20 @@ class ContactServiceImplTest {
 
             assertNotNull(savedContact);
             assertEquals(contactDto.getValue(), savedContact.getValue());
+        }
+
+        @Test
+        @DisplayName("Contact conflict")
+        void shouldShowContactConflict() {
+            User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
+            Contact contact = new Contact(1L, user, TagContact.PERSONAL, TypeContact.EMAIL, "fuchsleonardo01@gmail.com");
+            ContactDto contactDto = new ContactDto(1L, "EMAIL", "PERSONAL", "fuchsleonardo01@gmail.com");
+
+            when(contactMapper.toEntity(contactDto)).thenReturn(contact);
+            when(contactRepository.findByValue(contact.getValue())).thenReturn(contact);
+
+            assertThrows(ContactAlreadyExist.class, () -> contactService.save(contactDto));
+
         }
     }
 

@@ -4,6 +4,8 @@ import com.project.petshop.petshop.domain.entities.Address;
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.AddressDto;
+import com.project.petshop.petshop.exceptions.address.AddressAlreadyExist;
+import com.project.petshop.petshop.exceptions.address.AddressNotFound;
 import com.project.petshop.petshop.mapper.AddressMapper;
 import com.project.petshop.petshop.repository.AddressRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +54,18 @@ class AddressServiceImplTest {
 
             assertNotNull(savedAddress);
             assertEquals("Rua barão do rio branco", address.getStreet());
+        }
+        @Test
+        @DisplayName("Address conflict")
+        void shouldShowConflictException() {
+            User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
+            Address address = new Address(1L, user, user.getFullName(), "Rua barão do rio branco", "Bento Gonçalves", "Apto 702");
+            AddressDto addressDto = new AddressDto(1L, "Rua barão do rio branco", "Bento Gonçalves", "Apto 702");
 
+            when(addressMapper.toEntity(addressDto)).thenReturn(address);
+            when(addressRepository.findByUser(user)).thenReturn(Optional.of(address));
+
+            assertThrows(AddressAlreadyExist.class, () -> addressService.save(addressDto));
         }
     }
 }

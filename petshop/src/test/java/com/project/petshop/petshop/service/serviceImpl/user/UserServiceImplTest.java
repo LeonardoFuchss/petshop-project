@@ -15,10 +15,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ActiveProfiles("test")
@@ -48,6 +49,8 @@ class UserServiceImplTest {
             User user = new User(1L, "05416199008", Profile.ADMIN, "Leonardo Dos Santos Fuchs", "testeSenha10", LocalDateTime.now());
 
             doReturn(user).when(userRepository).save(any());
+            when(userRepository.findByUserCpf(any())).thenReturn(Optional.empty());
+            when(userRepository.findByFullName(any())).thenReturn(Optional.empty());
             when(userMapper.toEntity(any(UserDto.class))).thenReturn(user);
             when(passwordEncoder.encode(any())).thenReturn("senhaTeste10");
 
@@ -59,6 +62,9 @@ class UserServiceImplTest {
             // Assert
             assertNotNull(userSaved);
             assertEquals("Leonardo Dos Santos Fuchs", userSaved.getFullName());
+            assertEquals("senhaTeste10", userSaved.getPassword());
+            verify(passwordEncoder).encode("testeSenha10");
         }
+
     }
 }

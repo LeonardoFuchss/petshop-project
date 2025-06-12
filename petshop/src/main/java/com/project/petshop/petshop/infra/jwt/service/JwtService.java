@@ -4,6 +4,7 @@ import com.project.petshop.petshop.exceptions.user.InvalidTokenException;
 import com.project.petshop.petshop.domain.AccessToken;
 import com.project.petshop.petshop.domain.entities.User;
 import io.jsonwebtoken.Jwts;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,16 +16,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class JwtService { /* Classe de serviço do JWT para geração de tokens. */
 
-    @Autowired
-    private SecretKeyGenerator secretKey;
+    private final SecretKeyGenerator secretKey;
 
     public AccessToken generateToken(User user) { /* Função para gerar token de acesso, recebendo o usuário chamado na rota de autenticação */
 
         SecretKey key = secretKey.getKey(); /* Obtém a chave para assinar o token */
-
         Date expirationDate = generationExpirationDate(); /* Busca a data de expiração da função */
+
         Map<String, Object> claims = generateTokenClaims(user); /* Informações (claims) adicionais ao token */
 
         String token = Jwts.builder() /* Gera token */
@@ -42,6 +43,7 @@ public class JwtService { /* Classe de serviço do JWT para geração de tokens.
         LocalDateTime now = LocalDateTime.now().plusMinutes(expirationMinutes); /* Data atual + 60 minutos */
         return Date.from(now.atZone(ZoneId.systemDefault()).toInstant()); /* Define onde estamos no momento da requisição */
     }
+
     private Map<String, Object> generateTokenClaims(User user) { /* Gera informações adicionais do usuário para adicionar ao token (Posteriormente usado para decodificar o token e validar o usuário para autenticação (incluindo roles, permissões.)) */
         Map<String, Object> claims = new HashMap<>();
         claims.put("name", user.getUserCpf());

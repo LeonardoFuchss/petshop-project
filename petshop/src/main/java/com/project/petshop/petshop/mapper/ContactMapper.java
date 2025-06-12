@@ -21,7 +21,7 @@ public class ContactMapper {
     public Contact toEntity(ContactDto contactDto) {
 
         TagContact tagContact = TagContact.valueOf(contactDto.getTag());
-        TypeContact typeContact = TypeContact.valueOf(contactDto.getTypeContact());
+        TypeContact typeContact = TypeContact.valueOf(contactDto.getContactType());
 
         Optional<User> user = userRepository.findById(contactDto.getIdUser());
         if (user.isEmpty()) {

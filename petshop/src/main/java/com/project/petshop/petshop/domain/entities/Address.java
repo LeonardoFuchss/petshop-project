@@ -16,7 +16,7 @@ public class Address {
     @ManyToOne
     private User user;
     private String nameUser;
-    private String street; /* Logradouro */
+    private String street;
     private String city;
     private String complement;
 }

@@ -11,11 +11,14 @@ import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.pets.PetsService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -32,21 +35,14 @@ public class PetsServiceImpl implements PetsService {
      * .
      * Recebe o DTO por parâmetro, faz o mapeamento de DTO para entidade.
      * Verifica se o Usuário do pet existe, se existir verifica se ele já possui um pet com esse nome cadastrado.
-     * Salva um novo peto no banco de dados.
+     * Salva um novo peto no banco de dados se ainda não existir.
      */
     @Override
     public Pets save(PetsDto petsDto) {
         Pets pets = petsMapper.toEntity(petsDto);
-        Optional<User> userPet = userRepository.findById(pets.getClient().getId());
-        if (userPet.isPresent()) {
-            Optional<Pets> petExist = petsRepository.findByClientNameAndDogName(userPet.get().getFullName(), pets.getDogName());
-            if (petExist.isPresent()) {
-                throw new PetsAlreadyExist("Pet already exist. Please verify pet name and try again");
-            }
-        }
+        userPetIsPresent(pets);
         return petsRepository.save(pets);
     }
-
 
     /**
      * Realiza uma busca de todos os pets registrados no banco de dados.
@@ -56,16 +52,11 @@ public class PetsServiceImpl implements PetsService {
      */
     @Override
     public List<Pets> findAll() {
-        UserDetails userAuth = userAuth();
-        boolean isAdmin = userAuth.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"));
+        UserDetails userAuth = getUserAuth();
+        isAdmin(userAuth);
         List<Pets> petsList = petsRepository.findAll();
-        if (petsList.isEmpty()) {
-            throw new PetsNotFound("No pet record was found.");
-        } else if (isAdmin) {
-            return petsRepository.findAll();
-        } else {
-            throw new UnauthorizedException("You are not allowed to view all users. Search for your pet.");
-        }
+        petsListIsEmpty(petsList);
+        return petsList;
     }
 
     /**
@@ -73,7 +64,7 @@ public class PetsServiceImpl implements PetsService {
      */
     @Override
     public Pets findByClientName(String clientName) {
-        return petsRepository.findByClientName(clientName).orElseThrow(()-> new PetsNotFound("No pet record was found."));
+        return petsRepository.findByClientName(clientName).orElseThrow(() -> new PetsNotFound("No pet record was found."));
     }
 
 
@@ -86,16 +77,11 @@ public class PetsServiceImpl implements PetsService {
      */
     @Override
     public Pets findById(Long id) {
-        UserDetails userDetails = userAuth();
+        UserDetails userDetails = getUserAuth();
         Pets pets = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("No pet record was found."));
         User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new PetsNotFound("No user record was found."));
-        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch((g) -> g.getAuthority().equals("ROLE_ADMIN"));
-        boolean isAuth = userDetails.getUsername().equals(user.getUserCpf());
-        if (!isAdmin && !isAuth) {
-            throw new UnauthorizedException("You are not authorized to view all users. Search for your pet.");
-        } else {
-            return pets;
-        }
+        userAuthOrIsAdmin(userDetails, user.getUserCpf());
+        return pets;
     }
 
     /**
@@ -107,44 +93,67 @@ public class PetsServiceImpl implements PetsService {
      */
     @Override
     public void delete(Long id) {
-        UserDetails userAuth = userAuth();
+        UserDetails userAuth = getUserAuth();
         Pets pets = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("Pet not found"));
         User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new PetsNotFound("User pets not found"));
-        boolean isAdmin = userAuth.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"));
-        boolean isAuth = userAuth.getUsername().equals(user.getUserCpf());
-        if (!isAdmin && !isAuth) {
-            throw new UnauthorizedException("You are not authorized to delete this user. Search for your pet.");
-        }
+        userAuthOrIsAdmin(userAuth, user.getUserCpf());
         petsRepository.deleteById(pets.getId());
     }
 
 
     @Override
     public Pets update(PetsDto petsDto) {
-        UserDetails userAuth = userAuth();
+        UserDetails userAuth = getUserAuth();
         return saveUpdate(userAuth, petsDto);
     }
 
-    private boolean isAuthorized(UserDetails user, PetsDto petsDto) {
-        Optional<User> getUser = userRepository.findById(petsDto.getIdClient());
-        return user.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))
-                || user.getUsername().equals(getUser.get().getUserCpf());
+
+    private Pets saveUpdate(UserDetails userAuth, PetsDto petsDto) {
+        User user = userRepository.findById(petsDto.getIdClient()).orElseThrow(() -> new PetsNotFound("No user record was found."));
+        userAuthOrIsAdmin(userAuth, user.getUserCpf());
+        Pets pets = petsMapper.toEntity(petsDto);
+        pets.setBirthDate(petsDto.getBirthDate());
+        pets.setDogName(petsDto.getDogName());
+        return petsRepository.save(pets);
     }
 
-    private Pets saveUpdate(UserDetails user, PetsDto petsDto) {
-        Pets pets = petsRepository.findById(petsDto.getIdClient()).orElseThrow(() -> new PetsNotFound("No pet record was found."));
-        if (isAuthorized(user, petsDto)) {
-                pets.setBirthDate(petsDto.getBirthDate());
-                pets.setDogName(petsDto.getDogName());
-                return petsRepository.save(pets);
-        } else {
+
+    /**
+     *********************************************************************************************************************************
+     */
+
+    // Métodos reutilizáveis
+    
+    private void userPetIsPresent(Pets pets) {
+        Optional<User> userPet = userRepository.findById(pets.getClient().getId());
+        if (userPet.isPresent()) {
+            Optional<Pets> petExist = petsRepository.findByClientNameAndDogName(userPet.get().getFullName(), pets.getDogName());
+            if (petExist.isPresent()) {
+                throw new PetsAlreadyExist("Pet already exist. Please verify pet name and try again");
+            }
+        }
+    }
+
+    private void isAdmin(UserDetails userAuth) {
+        boolean isAdmin = userAuth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        if (!isAdmin) {
             throw new UnauthorizedException("You do not have permission to access this resource");
         }
     }
 
-    private UserDetails userAuth() {
+    private void userAuthOrIsAdmin(UserDetails userDetails, String cpf) {
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && !Objects.equals(userDetails.getUsername(), cpf)) {
+            throw new UnauthorizedException("You are not allowed to access this resource. Please login with admin account or contact the admin to register you as an admin account.");
+        }
+    }
+    private UserDetails getUserAuth() {
         return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    ;
+    private void petsListIsEmpty(List<Pets> pets) {
+        if (pets == null) {
+            throw new PetsNotFound("No pets found.");
+        }
+    }
 }

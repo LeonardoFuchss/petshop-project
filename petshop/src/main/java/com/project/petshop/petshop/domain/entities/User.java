@@ -2,13 +2,13 @@ package com.project.petshop.petshop.domain.entities;
 
 import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.UserDto;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "user_table")
+@Table(name = "pessoa")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

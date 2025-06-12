@@ -16,12 +16,13 @@ import org.hibernate.validator.constraints.br.CPF;
 @NoArgsConstructor
 public class UserDto {
     @NotNull(message = "The CPF value cannot be null")
+    @CPF
     private String userCpf;
     @Enumerated(EnumType.STRING)
     @NotNull(message = "The profile value cannot be null")
     @Pattern(regexp = "ADMIN|CLIENT", message = "Inválid Profile. Use ADMIN or CLIENT")
     private String profile;
-    @NotNull(message = "the name cannot be null")
+    @NotNull(message = "Name cannot be null")
     @Size(min = 4, max = 30, message = "Invalid full name size")
     private String fullName;
     @NotBlank(message = "The password value cannot be null")

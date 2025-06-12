@@ -55,7 +55,7 @@ public class ContactController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Optional<Contact>> findById(@PathVariable Long id) {
-        Optional<Contact> contact = contactService.findById(id);
+        Optional<Contact> contact = Optional.ofNullable(contactService.findById(id));
         return ResponseEntity.ok(contact);
     }
 

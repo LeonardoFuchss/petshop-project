@@ -22,37 +22,55 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public Contact save(ContactDto contactDto) { /* Persiste um novo contato */
-        Contact contact = contactMapper.toEntity(contactDto); /* Mapeamento de DTO para entidade */
-        Contact contactFind = contactRepository.findByValue(contact.getValue()); /* Consulta que busca o contato no banco de dados */
-        if (contactFind == null) { /* Verifica se o contato não existe */
-            return contactRepository.save(contact); /* Persiste no banco de dados */
-        } else {
-            throw new ContactAlreadyExist("Contact already exist");
-        }
+    public Contact save(ContactDto contactDto) {
+        Contact contact = contactMapper.toEntity(contactDto);
+        contactIsPresentByValue(contact); /* Verifica se o contato já existe. */
+        contactRepository.save(contact);
+        return contact;
     }
 
 
     @Override
     public List<Contact> findAll() { /* Busca uma lista de contatos */
         List<Contact> contacts = contactRepository.findAll();
-        if (contacts.isEmpty()) { /* Verifica se a lista está vazia */
-            throw new ContactNotFound("Contacts not found");
-        }
+        contactListIsEmpty(contacts);
         return contacts;
     }
 
 
     @Override
-    public Optional<Contact> findById(Long id) { /* Busca um contato específico com base no seu ID */
-        return  Optional.ofNullable(contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found")));
+    public Contact findById(Long id) { /* Busca um contato específico com base no seu ID */
+        return contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found"));
     }
 
 
     @Override
     public void delete(Long id) { /* Deleta um usuário com base no seu ID */
-       Optional<Contact> contact = Optional.ofNullable(contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found"))); /* Busca um usuário com base no ID */
-       Contact contactDelete = contact.get();
-       contactRepository.delete(contactDelete); /* Deleta o usuário do banco de dados. */
+       Contact contact = contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found"));
+       contactRepository.delete(contact); /* Deleta o usuário do banco de dados. */
+    }
+
+
+
+
+
+
+
+
+
+
+
+    // Métodos reutilizáveis
+
+    private void contactIsPresentByValue(Contact contact) {
+        Contact contactFound = contactRepository.findByValue(contact.getValue());
+        if (contactFound != null) {
+            throw new ContactAlreadyExist("Contact already exist.");
+        }
+    }
+    private void contactListIsEmpty(List<Contact> contacts) {
+        if (contacts.isEmpty()) {
+            throw new ContactNotFound("No contact found.");
+        }
     }
 }

@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/users")
@@ -87,8 +87,8 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Erro caso o usuário informado não exista."),
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
-    public ResponseEntity<User> findById(@PathVariable Long id) {
-        User user = userService.findById(id);
+    public ResponseEntity<Optional<User>> findById(@PathVariable Long id) {
+        Optional<User> user = userService.findById(id);
         return ResponseEntity.ok().body(user);
     }
 

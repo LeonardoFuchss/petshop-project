@@ -17,7 +17,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
-@EnableWebSecurity /* Classe de controle de segurança da aplicação */
+@EnableWebSecurity /* Habilitando classe de controle de segurança da aplicação */
 public class SecurityConfig {
 
     @Bean
@@ -58,7 +58,7 @@ public class SecurityConfig {
     }
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues(); /* Cria uma configuração padrão de cors, permitindo os valores padrão */
+        CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues(); /* Cria uma configuração padrão de cors, permitindo os valores padrões */
 
         UrlBasedCorsConfigurationSource cors = new UrlBasedCorsConfigurationSource(); /* Cria um objeto para gerenciar configurações de CORS com base nas URLs */
         cors.registerCorsConfiguration("/**", configuration); /* Aplica a configuração para todas as rotas do sistema. */

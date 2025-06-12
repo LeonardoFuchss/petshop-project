@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface ContactService {
     public Contact save(ContactDto contactDto);
     public List<Contact> findAll();
-    public Optional<Contact> findById(Long id);
+    public Contact findById(Long id);
     public void delete(Long id);
 }

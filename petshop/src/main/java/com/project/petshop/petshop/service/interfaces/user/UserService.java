@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface UserService {
     User save(UserDto userdTO);
     List<User> findAll();
-    User findById(Long id);
+    Optional<User> findById(Long id);
     void delete(Long id);
     Optional<User> findByUserCpf(String cpf);
     AccessToken authenticate(String cpf, String password);

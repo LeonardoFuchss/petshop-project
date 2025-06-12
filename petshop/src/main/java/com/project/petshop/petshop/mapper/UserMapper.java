@@ -12,7 +12,7 @@ public class UserMapper {
 
     public User toEntity(UserDto dto) {
 
-        Profile profileEnum =  Profile.valueOf(dto.getProfile().toUpperCase());
+        Profile profileEnum = Profile.valueOf(dto.getProfile().toUpperCase());
         return User.builder()
                 .userCpf(dto.getUserCpf())
                 .fullName(dto.getFullName())

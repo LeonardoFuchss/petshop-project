@@ -44,13 +44,10 @@ public class UserServiceImpl implements UserService {
      * Chama o save do userRepository para salvar um novo usuário.
      */
     @Override
-    public User save(UserDto userdTO) {
-        Optional<User> userFound = userByCpf(userdTO.getUserCpf());
-        Optional<User> userFoundByName = userByFullName(userdTO.getFullName());
-        if (userFound.isPresent() || userFoundByName.isPresent()) { /* OU */
-            throw new UserAlreadyException("User already exists");
-        }
-        User user = userMapper.toEntity(userdTO);
+    public User save(UserDto userDto) {
+        userByCpfIsPresent(userDto.getUserCpf());
+        userByFullNameIsPresent(userDto.getFullName());
+        User user = userMapper.toEntity(userDto);
         encodePassword(user);
         userRepository.save(user);
         return user;
@@ -73,17 +70,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> findAll() {
+        UserDetails userDetails = getUserAuth();
+        isAdmin(userDetails);
         List<User> users = userRepository.findAll();
-        UserDetails userDetails = userAuth();
-        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(g -> g.getAuthority().equals("ROLE_ADMIN"));
-        if (users.isEmpty()) {
-            throw new UserNotFoundException("Users not found");
-        }
-        if (isAdmin) {
-            return users;
-        } else {
-            throw new UnauthorizedException("You do not have permission to view all users.");
-        }
+        usersIsEmpty(users);
+        return users;
     }
 
     /**
@@ -94,18 +85,12 @@ public class UserServiceImpl implements UserService {
      * Verifica se o CPF do usuário é igual ao UserName do UserDetails (CPF é definido como user name)
      */
     @Override
-    public User findById(Long id) {
-        UserDetails userDetails = userAuth();
-        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
-        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
-            return user;
-        } else {
-            if (Objects.equals(user.getUserCpf(), userDetails.getUsername())) {
-                return user;
-            } else {
-                throw new UnauthorizedException("You are not allowed to access this user.");
-            }
-        }
+    public Optional<User> findById(Long id) {
+        UserDetails userDetails = getUserAuth();
+        Optional<User> user = Optional.ofNullable(userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found. Please try again.")));
+        User userPresent = userFound(user);
+        userAuthOrIsAdmin(userDetails, userPresent.getUserCpf());
+        return user;
     }
 
     /**
@@ -115,19 +100,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
-        UserDetails userDetails = userAuth();
-        if (userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))) {
-            userRepository.delete(user);
-        } else if (userDetails.getUsername().equals(user.getUserCpf())) {
-            userRepository.delete(user);
-        } else {
-            throw new UnauthorizedException("You are not allowed to delete this user.");
-        }
+        UserDetails userDetails = getUserAuth();
+        userAuthOrIsAdmin(userDetails, user.getUserCpf());
+        userRepository.deleteById(id);
     }
 
     @Override
     public Optional<User> findByUserCpf(String cpf) {
-        return userRepository.findByUserCpf(cpf);
+        Optional<User> user = userRepository.findByUserCpf(cpf);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("Invalid password or invalid CPF. try again");
+        } else {
+            return user;
+        }
     }
 
     /**
@@ -138,13 +123,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public AccessToken authenticate(String cpf, String password) {
-        Optional<User> user = userByCpf(cpf);
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("Invalid password or invalid CPF. try again");
-        }
-        boolean matches = passwordEncoder.matches(password, user.get().getPassword());
+        Optional<User> user = findByUserCpf(cpf);
+        User userPresent = userFound(user);
+        boolean matches = passwordEncoder.matches(password, userPresent.getPassword());
         if (matches) {
-            return jwtService.generateToken(user.get());
+            return jwtService.generateToken(userPresent);
         } else {
             throw new UnauthorizedException("Invalid credentials");
         }
@@ -161,9 +144,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User register(RegisterDto registerDto) {
-        if (userByCpf(registerDto.getUserCpf()).isPresent()) {
-            throw new UserAlreadyException("User already exists");
-        }
+        userByCpfIsPresent(registerDto.getUserCpf());
         User user = registerMapper.toEntity(registerDto);
         user.setSignUpDate(LocalDateTime.now());
         encodePassword(user);
@@ -177,57 +158,101 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User updateUser(UserDto userDto) {
-        UserDetails userDetails = userAuth();
+        UserDetails userDetails = getUserAuth();
         return saveUpdateUser(userDetails, userDto);
-    }
-
-    /**
-     * Verifica se o usuário possui role admin ou se o CPF é igual o utilizado na autenticação.
-     */
-    private boolean isAuthorized(UserDetails userDetails, String cpf) {
-        return userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))
-                || userDetails.getUsername().equals(cpf);
     }
 
     /**
      * Lógica para atualizar os dados do usuário.
      */
     private User saveUpdateUser(UserDetails userAuth, UserDto userDto) { /* Salva usuário no banco */
-        if (isAuthorized(userAuth, userDto.getUserCpf())) { /* se for autorizado */
-            Optional<User> userFound = userByCpf(userDto.getUserCpf());
-            String password = passwordEncoder.encode(userDto.getPassword());
-            if (userFound.isPresent()) {
-                userFound.get().setUserCpf(userDto.getUserCpf());
-                userFound.get().setPassword(password);
-                userFound.get().setFullName(userDto.getFullName());
-                return userRepository.save(userFound.get());
-            } else {
-                throw new UserNotFoundException("User not found");
-            }
-        } else {
-            throw new UnauthorizedException("You are not allowed to access this user.");
+        /* se for autorizado */
+        userAuthOrIsAdmin(userAuth, userDto.getUserCpf());
+        Optional<User> userFound = userByCpfIsEmpty(userDto.getUserCpf());
+        User userPresent = userFound(userFound);
+        String password = passwordEncoder.encode(userDto.getPassword());
+        userPresent.setUserCpf(userDto.getUserCpf());
+        userPresent.setPassword(password);
+        userPresent.setFullName(userDto.getFullName());
+        return userRepository.save(userPresent);
+    }
+
+
+    /**
+     * *************************************************************************************************************
+     */
+
+
+
+    // Métodos reutilizáveis
+
+    /**
+     * Verifica se já existe um usuário para o CPF cadastrado.
+     */
+    private void userByCpfIsPresent(String cpf) {
+        Optional<User> user = userRepository.findByUserCpf(cpf);
+        if (user.isPresent()) {
+            throw new UserAlreadyException("This CPF is already registered. Login or try again!");
         }
     }
 
-
-    // Métodos abstratos
-
     /**
-     * Recupera usuário pelo CPF.
+     * Busca o usuário com base no CPF.
      */
-    private Optional<User> userByCpf(String cpf) {
-        return userRepository.findByUserCpf(cpf);
+    private Optional<User> userByCpfIsEmpty(String cpf) {
+        return Optional.ofNullable(userRepository.findByUserCpf(cpf).orElseThrow(() -> new UserNotFoundException("User not found. Please try again!")));
     }
+
     /**
-     * Recupera usuário pelo nome completo.
+     * Verifica se já existe um full name registrado.
      */
-    private Optional<User> userByFullName(String fullName) {
-        return userRepository.findByFullName(fullName);
+    private void userByFullNameIsPresent(String fullName) {
+        Optional<User> user = userRepository.findByFullName(fullName);
+        if (user.isPresent()) {
+            throw new UserAlreadyException("This name is already registered. Login or try again!");
+        }
     }
+
     /**
-     * Recupera usuário autenticado no contexto do spring.
+     * Recupera o Usuário autenticado no contexto de segurança do spring.
      */
-    private UserDetails userAuth() {
+    private UserDetails getUserAuth() {
         return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    /**
+     * Verifica se o usuário é admin.
+     */
+    private void isAdmin(UserDetails userDetails) {
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            throw new UnauthorizedException("You are not allowed to access this resource. Please login with admin account or contact the admin to register you as an admin account.");
+        }
+    }
+
+    /**
+     * Verifica se o usuário está autenticado ou se é admin.
+     */
+    private void userAuthOrIsAdmin(UserDetails userDetails, String cpf) {
+        boolean isAdmin = userDetails.getAuthorities().stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && !Objects.equals(userDetails.getUsername(), cpf)) {
+            throw new UnauthorizedException("You are not allowed to access this resource. Please login with admin account or contact the admin to register you as an admin account.");
+        }
+    }
+
+    /**
+     * Verifica se a lista de usuários está vazia.
+     */
+    private void usersIsEmpty(List<User> users) {
+        if (users.isEmpty()) {
+            throw new UserNotFoundException("No user has been found.");
+        }
+    }
+
+    private User userFound(Optional<User> user) {
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User not found. Please try again.");
+        }
+        return user.get();
     }
 }

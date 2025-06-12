@@ -18,7 +18,7 @@ public class ContactDto {
     private String tag;
     @Pattern(regexp = "EMAIL|PHONE", message = "Invalid type contact. Use EMAIL or PHONE.")
     @NotNull(message = "Type Contact cannot be null.")
-    private String typeContact;
+    private String contactType;
     @NotNull(message = "Phone or Email cannot be null.")
     private String value;
     /* validar value para contato válido */

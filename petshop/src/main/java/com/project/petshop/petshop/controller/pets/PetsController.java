@@ -30,7 +30,7 @@ public class PetsController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<?> save(@Valid @RequestBody PetsDto petsDto) {
-        Pets pets = petsService.save(petsDto);
+        Pets pets = petsService.createPet(petsDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(pets);
     }
 
@@ -43,7 +43,7 @@ public class PetsController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<List<Pets>> findAll() {
-        return ResponseEntity.ok(petsService.findAll());
+        return ResponseEntity.ok(petsService.findAllPets());
     }
 
 
@@ -55,7 +55,7 @@ public class PetsController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Pets> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(petsService.findById(id));
+        return ResponseEntity.ok(petsService.findPetById(id));
     }
 
 
@@ -67,13 +67,13 @@ public class PetsController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        petsService.delete(id);
+        petsService.deletePetById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/update")
     public ResponseEntity<Pets> update(@Valid @RequestBody PetsDto petsDto) {
-        Pets petsSaved = petsService.update(petsDto);
+        Pets petsSaved = petsService.updatePet(petsDto);
         return ResponseEntity.ok(petsSaved);
     }
 }

@@ -50,12 +50,16 @@ public class SecurityConfig {
                         auth.requestMatchers("/contact/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/breed/**").hasRole("ADMIN"); /* Limita acesso a admin */
                         auth.requestMatchers("/pets/**").hasAnyRole("ADMIN", "CLIENT");
-                        auth.requestMatchers("/appointment/**").permitAll(); /* Limita acesso a admin */; /* Libera acesso ao público */
+                        auth.requestMatchers("/appointment/**").permitAll(); /* Libera acesso ao público */
                         auth.anyRequest().authenticated();
                     })
                     .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) /* Adiciona o filtro JWT antes do filtro padrão de autenticação */
                     .build();
     }
+
+    /**
+     * Define regras que permitem que o backend aceite requisições de outras origens.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues(); /* Cria uma configuração padrão de cors, permitindo os valores padrões */

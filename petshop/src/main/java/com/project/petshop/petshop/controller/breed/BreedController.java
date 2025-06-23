@@ -30,7 +30,7 @@ public class BreedController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<?> save(@Valid @RequestBody BreedDto breedDto) {
-        Breed breed = breedService.save(breedDto);
+        Breed breed = breedService.createBreed(breedDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(breed);
     }
 
@@ -43,7 +43,7 @@ public class BreedController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<List<Breed>> findAll() {
-        return ResponseEntity.ok(breedService.findAll());
+        return ResponseEntity.ok(breedService.findAllBreeds());
     }
 
 
@@ -55,7 +55,7 @@ public class BreedController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Optional<Breed>> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(breedService.findById(id));
+        return ResponseEntity.ok(breedService.findBreedById(id));
     }
 
 
@@ -67,7 +67,7 @@ public class BreedController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        breedService.delete(id);
+        breedService.deleteBreedById(id);
         return ResponseEntity.noContent().build();
     }
 }

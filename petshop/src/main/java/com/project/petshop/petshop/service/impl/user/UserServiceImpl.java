@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.user;
+package com.project.petshop.petshop.service.impl.user;
 
 import com.project.petshop.petshop.dto.RegisterDto;
 import com.project.petshop.petshop.dto.UserDto;
@@ -44,9 +44,9 @@ public class UserServiceImpl implements UserService {
      * Chama o save do userRepository para salvar um novo usuário.
      */
     @Override
-    public User save(UserDto userDto) {
-        userByCpfIsPresent(userDto.getUserCpf());
-        userByFullNameIsPresent(userDto.getFullName());
+    public User createUser(UserDto userDto) {
+        validateUserCpfNotExist(userDto.getUserCpf());
+        validateFullNameNotExist(userDto.getFullName());
         User user = userMapper.toEntity(userDto);
         encodePassword(user);
         userRepository.save(user);
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
      * Variável boolean para verificar se o usuário autenticado possui role ADMIN. (Role necessário para ter permissão de visualizar todos os usuários)
      */
     @Override
-    public List<User> findAll() {
+    public List<User> findAllUsers() {
         UserDetails userDetails = getUserAuth();
         isAdmin(userDetails);
         List<User> users = userRepository.findAll();
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
      * Verifica se o CPF do usuário é igual ao UserName do UserDetails (CPF é definido como user name)
      */
     @Override
-    public Optional<User> findById(Long id) {
+    public Optional<User> findUserById(Long id) {
         UserDetails userDetails = getUserAuth();
         Optional<User> user = Optional.ofNullable(userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found. Please try again.")));
         User userPresent = userFound(user);
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
      * UserDetails para recuperar usuário autenticado e verificar role de permissão
      */
     @Override
-    public void delete(Long id) {
+    public void deleteUserById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
         UserDetails userDetails = getUserAuth();
         userAuthOrIsAdmin(userDetails, user.getUserCpf());
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByUserCpf(String cpf) {
+    public Optional<User> findUserByCpf(String cpf) {
         Optional<User> user = userRepository.findByUserCpf(cpf);
         if (user.isEmpty()) {
             throw new UserNotFoundException("Invalid password or invalid CPF. try again");
@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public AccessToken authenticate(String cpf, String password) {
-        Optional<User> user = findByUserCpf(cpf);
+        Optional<User> user = findUserByCpf(cpf);
         User userPresent = userFound(user);
         boolean matches = passwordEncoder.matches(password, userPresent.getPassword());
         if (matches) {
@@ -143,8 +143,8 @@ public class UserServiceImpl implements UserService {
      * Chama o save do userRepository para salvar um novo usuário.
      */
     @Override
-    public User register(RegisterDto registerDto) {
-        userByCpfIsPresent(registerDto.getUserCpf());
+    public User publicUserRegistration(RegisterDto registerDto) {
+        validateUserCpfNotExist(registerDto.getUserCpf());
         User user = registerMapper.toEntity(registerDto);
         user.setSignUpDate(LocalDateTime.now());
         encodePassword(user);
@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService {
     private User saveUpdateUser(UserDetails userAuth, UserDto userDto) { /* Salva usuário no banco */
         /* se for autorizado */
         userAuthOrIsAdmin(userAuth, userDto.getUserCpf());
-        Optional<User> userFound = userByCpfIsEmpty(userDto.getUserCpf());
+        Optional<User> userFound = getUserByCpf(userDto.getUserCpf());
         User userPresent = userFound(userFound);
         String password = passwordEncoder.encode(userDto.getPassword());
         userPresent.setUserCpf(userDto.getUserCpf());
@@ -183,13 +183,12 @@ public class UserServiceImpl implements UserService {
      */
 
 
-
     // Métodos reutilizáveis
 
     /**
      * Verifica se já existe um usuário para o CPF cadastrado.
      */
-    private void userByCpfIsPresent(String cpf) {
+    private void validateUserCpfNotExist(String cpf) {
         Optional<User> user = userRepository.findByUserCpf(cpf);
         if (user.isPresent()) {
             throw new UserAlreadyException("This CPF is already registered. Login or try again!");
@@ -199,14 +198,14 @@ public class UserServiceImpl implements UserService {
     /**
      * Busca o usuário com base no CPF.
      */
-    private Optional<User> userByCpfIsEmpty(String cpf) {
+    private Optional<User> getUserByCpf(String cpf) {
         return Optional.ofNullable(userRepository.findByUserCpf(cpf).orElseThrow(() -> new UserNotFoundException("User not found. Please try again!")));
     }
 
     /**
      * Verifica se já existe um full name registrado.
      */
-    private void userByFullNameIsPresent(String fullName) {
+    private void validateFullNameNotExist(String fullName) {
         Optional<User> user = userRepository.findByFullName(fullName);
         if (user.isPresent()) {
             throw new UserAlreadyException("This name is already registered. Login or try again!");

@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.contact;
+package com.project.petshop.petshop.service.impl.contact;
 
 import com.project.petshop.petshop.domain.entities.Contact;
 import com.project.petshop.petshop.domain.entities.User;

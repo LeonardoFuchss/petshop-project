@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.address;
+package com.project.petshop.petshop.service.impl.address;
 
 import com.project.petshop.petshop.dto.AddressDto;
 import com.project.petshop.petshop.exceptions.address.AddressAlreadyExist;
@@ -23,7 +23,7 @@ public class AddressServiceImpl implements AddressService {
 
 
     @Override
-    public Address save(AddressDto addressDto) { /* Registra um novo endereço no banco de dados */
+    public Address createAddress(AddressDto addressDto) { /* Registra um novo endereço no banco de dados */
         Address address = addressMapper.toEntity(addressDto); /* Mapeamento de DTO para entidade */
         Optional<Address> addressFindByUser = addressRepository.findByUser(address.getUser()); /* Busca um endereço com base no usuário */
         if (addressFindByUser.isPresent()) { /* Verifica se o endereço já existe. */
@@ -35,7 +35,7 @@ public class AddressServiceImpl implements AddressService {
 
 
     @Override
-    public Optional<Address> findById(Long id) { /* Busca um usuário com base no seu identificador */
+    public Optional<Address> findAddressById(Long id) { /* Busca um usuário com base no seu identificador */
         return Optional.ofNullable(
                 addressRepository.findById(id).orElseThrow(() -> new AddressNotFound("The Address informed does not exist."))
         );
@@ -43,7 +43,7 @@ public class AddressServiceImpl implements AddressService {
 
 
     @Override
-    public List<Address> findAll() { /* Busca uma lista de endereços */
+    public List<Address> findAllAddress() { /* Busca uma lista de endereços */
         List<Address> addressFindAll = addressRepository.findAll();
         if (addressFindAll.isEmpty()) { /* Verifica se a lista esta vazia */
             throw new AddressNotFound("No address found.");
@@ -53,7 +53,7 @@ public class AddressServiceImpl implements AddressService {
 
 
     @Override
-    public void deleteById(Long id) { /* Deleta o endereço com base no ID */
+    public void deleteAddressById(Long id) { /* Deleta o endereço com base no ID */
         Address address = addressRepository.findById(id).orElseThrow(() -> new AddressNotFound("The Address informed does not exist."));
         addressRepository.delete(address); /* Se existir deleta do banco de dados */
     }

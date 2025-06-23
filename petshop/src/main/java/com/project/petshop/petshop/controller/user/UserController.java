@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
+@AllArgsConstructor
 public class UserController {
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
 
 
     @PostMapping("/save")
@@ -33,7 +35,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<?> save(@Valid @RequestBody UserDto userdTO) {
-        User user = userService.save(userdTO);
+        User user = userService.createUser(userdTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
@@ -45,7 +47,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<?> register(@Valid @RequestBody RegisterDto registerDto) {
-        User user = userService.register(registerDto);
+        User user = userService.publicUserRegistration(registerDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
@@ -74,7 +76,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<List<User>> findAll() {
-        List<User> users = userService.findAll();
+        List<User> users = userService.findAllUsers();
         return ResponseEntity.ok(users);
     }
 
@@ -88,7 +90,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Optional<User>> findById(@PathVariable Long id) {
-        Optional<User> user = userService.findById(id);
+        Optional<User> user = userService.findUserById(id);
         return ResponseEntity.ok().body(user);
     }
 
@@ -102,7 +104,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userService.delete(id);
+        userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
 

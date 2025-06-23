@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.breed;
+package com.project.petshop.petshop.service.impl.breed;
 
 import com.project.petshop.petshop.dto.BreedDto;
 import com.project.petshop.petshop.exceptions.breed.BreedAlreadyExist;
@@ -21,7 +21,7 @@ public class BreedServiceImpl implements BreedService {
     private final BreedMapper breedMapper;
 
     @Override
-    public Breed save(BreedDto breedDto) {
+    public Breed createBreed(BreedDto breedDto) {
         Breed breed = breedMapper.toEntity(breedDto); /* Mapeamento de DTO para entidade */
         Breed breedFind = breedRepository.findByDescription(breed.getDescription()); /* Busca uma raça com base na sua descrição */
         if (breedFind != null) { /* Verifica se existe uma raça com a mesma descrição */
@@ -33,7 +33,7 @@ public class BreedServiceImpl implements BreedService {
 
 
     @Override
-    public List<Breed> findAll() { /* Busca uma lista de raças */
+    public List<Breed> findAllBreeds() { /* Busca uma lista de raças */
         List<Breed> breeds = breedRepository.findAll();
         if (breeds.isEmpty()) { /* Verifica se a lista está vazia */
             throw new BreedNotFound("Breeds not found");
@@ -44,13 +44,13 @@ public class BreedServiceImpl implements BreedService {
 
 
     @Override
-    public Optional<Breed> findById(Long id) { /* Busca uma raça com base no seu identificador */
+    public Optional<Breed> findBreedById(Long id) { /* Busca uma raça com base no seu identificador */
         return Optional.ofNullable(breedRepository.findById(id).orElseThrow(() -> new BreedNotFound("Breed not found")));
     }
 
 
     @Override
-    public void delete(Long id) { /* Deleta uma raça com base no seu identificador */
+    public void deleteBreedById(Long id) { /* Deleta uma raça com base no seu identificador */
         Breed breedFind = (breedRepository.findById(id).orElseThrow(() -> new BreedNotFound("Breed not found"))); /* Busca uma raça com base no ID */
         breedRepository.delete(breedFind); /* Deleta a raça do banco de dados */
 

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ContactService {
-    public Contact save(ContactDto contactDto);
-    public List<Contact> findAll();
-    public Contact findById(Long id);
-    public void delete(Long id);
+    Contact createContact(ContactDto contactDto);
+    Contact findContactById(Long id);
+    List<Contact> findAllContacts();
+    void deleteContactById(Long id);
 }

@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AddressService {
-    public Address save(AddressDto addressDto);
-    public Optional<Address> findById(Long id);
-    public List<Address> findAll();
-    public void deleteById(Long id);
-
+    Address createAddress(AddressDto addressDto);
+    Optional<Address> findAddressById(Long id);
+    List<Address> findAllAddress();
+    void deleteAddressById(Long id);
 }

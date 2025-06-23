@@ -1,11 +1,10 @@
-package com.project.petshop.petshop.service.serviceImpl.address;
+package com.project.petshop.petshop.service.impl.address;
 
 import com.project.petshop.petshop.domain.entities.Address;
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.AddressDto;
 import com.project.petshop.petshop.exceptions.address.AddressAlreadyExist;
-import com.project.petshop.petshop.exceptions.address.AddressNotFound;
 import com.project.petshop.petshop.mapper.AddressMapper;
 import com.project.petshop.petshop.repository.AddressRepository;
 import org.junit.jupiter.api.DisplayName;

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/appointment")
+@AllArgsConstructor
 public class AppointmentController {
 
-    @Autowired
-    private AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
 
     @PostMapping("/save")
     @Operation(description = "Persiste um novo appointment no banco de dados.")
@@ -29,7 +30,7 @@ public class AppointmentController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<Appointment> save (@Valid @RequestBody AppointmentDto appointmentDto) {
-        Appointment appointment = appointmentService.save(appointmentDto);
+        Appointment appointment = appointmentService.createAppointment(appointmentDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(appointment);
     }
 
@@ -42,7 +43,7 @@ public class AppointmentController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<List<Appointment>> findAll() {
-        List<Appointment> appointments = appointmentService.findAll();
+        List<Appointment> appointments = appointmentService.findAllAppointments();
         return ResponseEntity.ok(appointments);
     }
 
@@ -55,7 +56,7 @@ public class AppointmentController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Appointment> findById(@PathVariable Long id) {
-        Appointment appointment = appointmentService.findById(id);
+        Appointment appointment = appointmentService.findAppointmentById(id);
         return ResponseEntity.ok(appointment);
     }
 
@@ -68,7 +69,7 @@ public class AppointmentController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Void> delete (@PathVariable Long id) {
-        Appointment appointment = appointmentService.findById(id);
+        appointmentService.deleteAppointmentById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
      * @Return um ResponseEntity contendo os detalhes do erro, incluindo timestamp, status, message e caminho da requisição.
      */
     public ResponseEntity<Map<String, Object>> buildErrorResponse(Exception ex, HttpStatus status, HttpServletRequest request) {
-        /* Criamos um mapa com as informações do erro para retornar ao cliente */
+        /* Criamos um map com as informações do erro para retornar ao cliente */
         Map<String, Object> body = Map.of(
                 "timestamp", LocalDateTime.now(), /* Momento em que o erro ocorreu */
                 "status", status.value(), /* Código HTTP */

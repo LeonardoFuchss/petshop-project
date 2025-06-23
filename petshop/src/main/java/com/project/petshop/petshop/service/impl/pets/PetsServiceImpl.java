@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.pets;
+package com.project.petshop.petshop.service.impl.pets;
 
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.dto.PetsDto;
@@ -16,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,7 +37,7 @@ public class PetsServiceImpl implements PetsService {
      * Salva um novo peto no banco de dados se ainda não existir.
      */
     @Override
-    public Pets save(PetsDto petsDto) {
+    public Pets createPet(PetsDto petsDto) {
         Pets pets = petsMapper.toEntity(petsDto);
         userPetIsPresent(pets);
         return petsRepository.save(pets);
@@ -51,7 +50,7 @@ public class PetsServiceImpl implements PetsService {
      * Recupera a lista dos pets.
      */
     @Override
-    public List<Pets> findAll() {
+    public List<Pets> findAllPets() {
         UserDetails userAuth = getUserAuth();
         isAdmin(userAuth);
         List<Pets> petsList = petsRepository.findAll();
@@ -76,7 +75,7 @@ public class PetsServiceImpl implements PetsService {
      * (Verificação feita para apenas admins conseguirem visualizar ou usuários client visualizarem apenas o registro de seus pets).
      */
     @Override
-    public Pets findById(Long id) {
+    public Pets findPetById(Long id) {
         UserDetails userDetails = getUserAuth();
         Pets pets = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("No pet record was found."));
         User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new PetsNotFound("No user record was found."));
@@ -92,7 +91,7 @@ public class PetsServiceImpl implements PetsService {
      * (Verificação feita para apenas admins conseguirem visualizar ou usuários client visualizarem apenas o registro de seus pets).
      */
     @Override
-    public void delete(Long id) {
+    public void deletePetById(Long id) {
         UserDetails userAuth = getUserAuth();
         Pets pets = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("Pet not found"));
         User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new PetsNotFound("User pets not found"));
@@ -102,7 +101,7 @@ public class PetsServiceImpl implements PetsService {
 
 
     @Override
-    public Pets update(PetsDto petsDto) {
+    public Pets updatePet(PetsDto petsDto) {
         UserDetails userAuth = getUserAuth();
         return saveUpdate(userAuth, petsDto);
     }

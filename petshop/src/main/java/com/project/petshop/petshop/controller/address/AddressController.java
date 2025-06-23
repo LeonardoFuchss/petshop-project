@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/address")
+@AllArgsConstructor
 public class AddressController {
 
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
 
     @PostMapping("/save")
     @Operation(description = "Persiste um novo address no banco de dados.")
@@ -30,7 +31,7 @@ public class AddressController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<Address> save(@Valid @RequestBody AddressDto addressDto) {
-        Address address = addressService.save(addressDto);
+        Address address = addressService.createAddress(addressDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(address);
     }
 
@@ -43,7 +44,7 @@ public class AddressController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
     })
     public ResponseEntity<List<Address>> findAll() {
-        return ResponseEntity.ok(addressService.findAll());
+        return ResponseEntity.ok(addressService.findAllAddress());
     }
 
 
@@ -55,7 +56,7 @@ public class AddressController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Optional<Address>> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(addressService.findById(id));
+        return ResponseEntity.ok(addressService.findAddressById(id));
     }
 
 
@@ -67,7 +68,7 @@ public class AddressController {
             @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
     })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        addressService.deleteById(id);
+        addressService.deleteAddressById(id);
         return ResponseEntity.noContent().build();
     }
 }

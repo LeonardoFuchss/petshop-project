@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.pets;
+package com.project.petshop.petshop.service.impl.pets;
 
 import com.project.petshop.petshop.domain.entities.Breed;
 import com.project.petshop.petshop.domain.entities.Pets;

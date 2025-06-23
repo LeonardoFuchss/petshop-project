@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.user;
+package com.project.petshop.petshop.service.impl.user;
 
 import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;

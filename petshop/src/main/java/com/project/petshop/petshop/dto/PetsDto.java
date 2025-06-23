@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class PetsDto {
     @NotNull(message = "The customer cannot be null or void.")
     private Long idClient;
-    @NotNull(message = "The breed value cannot be null or void.")
+    @NotNull(message = "The breed cannot be null or void.")
     private Long idBreed;
     @Past(message = "The birthday date must be in the past.")
     @NotNull(message = "Birth date cannot be null")

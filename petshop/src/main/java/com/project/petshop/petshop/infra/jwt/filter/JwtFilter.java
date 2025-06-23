@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (token != null) {
             try {
                 String cpf = jwtService.getCpfFromToken(token); /* Obtém o CPF do usuário a partir do token */
-                Optional<User> user = userService.findByUserCpf(cpf); /* Busca o usuário do token no banco de dados */
+                Optional<User> user = userService.findUserByCpf(cpf); /* Busca o usuário do token no banco de dados */
                 /* Se o usuário existir, define o usuário como autenticado */
                 user.ifPresent(this::setUserAsAuthenticated);
             } catch (InvalidTokenException e) {

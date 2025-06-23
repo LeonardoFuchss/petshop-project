@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BreedRepository extends JpaRepository<Breed, Long> {
 
-    public Breed findByDescription(String name);
+    Breed findByDescription(String name);
 }

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BreedService {
-    public Breed save(BreedDto breedDto);
-    public List<Breed> findAll();
-    public Optional<Breed> findById(Long id);
-    public void delete(Long id);
+    Breed createBreed(BreedDto breedDto);
+    List<Breed> findAllBreeds();
+    Optional<Breed> findBreedById(Long id);
+    void deleteBreedById(Long id);
 }

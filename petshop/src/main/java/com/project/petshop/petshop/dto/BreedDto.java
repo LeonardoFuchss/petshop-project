@@ -13,6 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class BreedDto {
     @NotNull(message = "Description cannot be null")
-    @Size(min = 5, max = 30, message = "Invalid description size")
+    @Size(min = 5, max = 30, message = "Invalid description size. Use at most 30 characters and at least 5 characters.")
     private String description;
 }

@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PetsService {
-    public Pets save(PetsDto petsDto);
-    public List<Pets> findAll();
-    public Pets findByClientName(String clientName);
-    public Pets findById(Long id);
-    public void delete(Long id);
-    public Pets update(PetsDto petsDto);
+    Pets createPet(PetsDto petsDto);
+    List<Pets> findAllPets();
+    Pets findByClientName(String clientName);
+    Pets findPetById(Long id);
+    void deletePetById(Long id);
+    Pets updatePet(PetsDto petsDto);
 }

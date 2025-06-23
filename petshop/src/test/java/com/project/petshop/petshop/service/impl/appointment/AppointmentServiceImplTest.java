@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.appointment;
+package com.project.petshop.petshop.service.impl.appointment;
 
 import com.project.petshop.petshop.domain.entities.Appointment;
 import com.project.petshop.petshop.domain.entities.Breed;
@@ -7,7 +7,6 @@ import com.project.petshop.petshop.domain.entities.User;
 import com.project.petshop.petshop.domain.enums.Profile;
 import com.project.petshop.petshop.dto.AppointmentDto;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentExist;
-import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
 import com.project.petshop.petshop.mapper.AppointmentMapper;
 import com.project.petshop.petshop.repository.AppointmentRepository;
 import com.project.petshop.petshop.repository.UserRepository;
@@ -18,17 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

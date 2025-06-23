@@ -6,9 +6,9 @@ import com.project.petshop.petshop.domain.entities.Appointment;
 import java.util.List;
 
 public interface AppointmentService {
-
-    public Appointment save(AppointmentDto appointmentDto);
-    public List<Appointment> findAll();
-    public Appointment findById(Long id);
-    public void delete(Long id);
+    Appointment createAppointment(AppointmentDto appointmentDto);
+    List<Appointment> findAllAppointments();
+    Appointment updateAppointment(Long id, AppointmentDto appointmentDto);
+    Appointment findAppointmentById(Long id);
+    void deleteAppointmentById(Long id);
 }

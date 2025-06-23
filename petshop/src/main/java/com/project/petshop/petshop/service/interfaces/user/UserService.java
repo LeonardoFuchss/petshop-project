@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    User save(UserDto userdTO);
-    List<User> findAll();
-    Optional<User> findById(Long id);
-    void delete(Long id);
-    Optional<User> findByUserCpf(String cpf);
+    User createUser(UserDto userdTO);
+    List<User> findAllUsers();
+    Optional<User> findUserById(Long id);
+    void deleteUserById(Long id);
+    Optional<User> findUserByCpf(String cpf);
     AccessToken authenticate(String cpf, String password);
-    User register(RegisterDto registerDto);
+    User publicUserRegistration(RegisterDto registerDto);
     User updateUser(UserDto userDto);
 }

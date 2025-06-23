@@ -15,13 +15,13 @@ import org.hibernate.validator.constraints.br.CPF;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterDto {
-    @NotNull(message = "The CPF value cannot be null")
+    @NotNull(message = "The CPF cannot be null")
     @CPF(message = "Invalid CPF")
     private String userCpf;
-    @NotNull(message = "the name cannot be null")
-    @Size(min = 4, max = 30, message = "Invalid full name size")
+    @NotNull(message = "The name cannot be null")
+    @Size(min = 4, max = 30, message = "Invalid name size. Use at least 4 characters in your name.")
     private String fullName;
-    @NotBlank(message = "The password value cannot be null")
+    @NotBlank(message = "The password cannot be null")
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,}$",
             message = "The password must have at least one uppercase letter, a lowercase, a number and a special character"

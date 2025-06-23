@@ -1,4 +1,4 @@
-package com.project.petshop.petshop.service.serviceImpl.contact;
+package com.project.petshop.petshop.service.impl.contact;
 
 import com.project.petshop.petshop.dto.ContactDto;
 import com.project.petshop.petshop.exceptions.contact.ContactAlreadyExist;
@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 public class ContactServiceImpl implements ContactService {
@@ -22,7 +22,7 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public Contact save(ContactDto contactDto) {
+    public Contact createContact(ContactDto contactDto) {
         Contact contact = contactMapper.toEntity(contactDto);
         contactIsPresentByValue(contact); /* Verifica se o contato já existe. */
         contactRepository.save(contact);
@@ -31,7 +31,7 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public List<Contact> findAll() { /* Busca uma lista de contatos */
+    public List<Contact> findAllContacts() { /* Busca uma lista de contatos */
         List<Contact> contacts = contactRepository.findAll();
         contactListIsEmpty(contacts);
         return contacts;
@@ -39,13 +39,13 @@ public class ContactServiceImpl implements ContactService {
 
 
     @Override
-    public Contact findById(Long id) { /* Busca um contato específico com base no seu ID */
+    public Contact findContactById(Long id) { /* Busca um contato específico com base no seu ID */
         return contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found"));
     }
 
 
     @Override
-    public void delete(Long id) { /* Deleta um usuário com base no seu ID */
+    public void deleteContactById(Long id) { /* Deleta um usuário com base no seu ID */
        Contact contact = contactRepository.findById(id).orElseThrow(() -> new ContactNotFound("Contact not found"));
        contactRepository.delete(contact); /* Deleta o usuário do banco de dados. */
     }

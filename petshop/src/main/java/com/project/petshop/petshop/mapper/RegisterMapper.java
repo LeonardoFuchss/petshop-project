@@ -1,11 +1,13 @@
 package com.project.petshop.petshop.mapper;
 
-import com.project.petshop.petshop.domain.entities.User;
-import com.project.petshop.petshop.domain.enums.Profile;
+import com.project.petshop.petshop.model.entities.User;
+import com.project.petshop.petshop.model.entities.enums.Profile;
 import com.project.petshop.petshop.dto.RegisterDto;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@AllArgsConstructor
 public class RegisterMapper {
 
      public User toEntity(RegisterDto registerDto) {
@@ -20,5 +22,4 @@ public class RegisterMapper {
                  .profile(profileSave)
                  .build();
      }
-
 }

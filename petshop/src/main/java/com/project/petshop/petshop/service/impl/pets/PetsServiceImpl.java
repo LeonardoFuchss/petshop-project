@@ -1,12 +1,15 @@
 package com.project.petshop.petshop.service.impl.pets;
 
-import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.dto.PetDtoPublic;
+import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
+import com.project.petshop.petshop.mapper.PetMapperPublic;
+import com.project.petshop.petshop.model.entities.Pet;
+import com.project.petshop.petshop.model.entities.User;
 import com.project.petshop.petshop.dto.PetsDto;
 import com.project.petshop.petshop.exceptions.pets.PetsAlreadyExist;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
 import com.project.petshop.petshop.exceptions.user.UnauthorizedException;
 import com.project.petshop.petshop.mapper.PetsMapper;
-import com.project.petshop.petshop.domain.entities.Pets;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.pets.PetsService;
@@ -27,20 +30,37 @@ public class PetsServiceImpl implements PetsService {
     private final PetsRepository petsRepository;
     private final PetsMapper petsMapper;
     private final UserRepository userRepository;
+    private final PetMapperPublic petMapperPublic;
 
 
     /**
      * Persiste um novo pet no banco de dados.
      * .
      * Recebe o DTO por parâmetro, faz o mapeamento de DTO para entidade.
-     * Verifica se o Usuário do pet existe, se existir verifica se ele já possui um pet com esse nome cadastrado.
-     * Salva um novo peto no banco de dados se ainda não existir.
+     * Salva um novo peto no banco de dados
+     * Acesso restrito para admins
      */
     @Override
-    public Pets createPet(PetsDto petsDto) {
-        Pets pets = petsMapper.toEntity(petsDto);
-        userPetIsPresent(pets);
-        return petsRepository.save(pets);
+    public Pet createPet(PetsDto petsDto) {
+        Pet pet = petsMapper.toEntity(petsDto);
+        UserDetails userAuth = getUserAuth();
+        isAdmin(userAuth);
+        return petsRepository.save(pet);
+    }
+    /**
+     * Persiste um novo pet no banco de dados.
+     * .
+     * Recebe o DTO por parâmetro, faz o mapeamento de DTO para entidade.
+     * Salva um novo peto no banco de dados
+     * Acesso liberado para público.
+     */
+    @Override
+    public Pet createPetPublic(PetDtoPublic petDtoPublic) {
+        Pet pet = petMapperPublic.toEntity(petDtoPublic);
+        UserDetails auth = getUserAuth();
+        Optional<User> userFound = Optional.ofNullable(userRepository.findByUserCpf(auth.getUsername()).orElseThrow(() -> new UserNotFoundException("User not found.")));
+        pet.setClient(userFound.get());
+        return petsRepository.save(pet);
     }
 
     /**
@@ -50,22 +70,13 @@ public class PetsServiceImpl implements PetsService {
      * Recupera a lista dos pets.
      */
     @Override
-    public List<Pets> findAllPets() {
+    public List<Pet> findAllPets() {
         UserDetails userAuth = getUserAuth();
         isAdmin(userAuth);
-        List<Pets> petsList = petsRepository.findAll();
-        petsListIsEmpty(petsList);
-        return petsList;
+        List<Pet> petList = petsRepository.findAll();
+        petsListIsEmpty(petList);
+        return petList;
     }
-
-    /**
-     * Busca um pet pelo nome do seu usuário.
-     */
-    @Override
-    public Pets findByClientName(String clientName) {
-        return petsRepository.findByClientName(clientName).orElseThrow(() -> new PetsNotFound("No pet record was found."));
-    }
-
 
     /**
      * Retorna um usuário com base no id passado por parâmetro.
@@ -75,12 +86,12 @@ public class PetsServiceImpl implements PetsService {
      * (Verificação feita para apenas admins conseguirem visualizar ou usuários client visualizarem apenas o registro de seus pets).
      */
     @Override
-    public Pets findPetById(Long id) {
+    public Pet findPetById(Long id) {
         UserDetails userDetails = getUserAuth();
-        Pets pets = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("No pet record was found."));
-        User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new PetsNotFound("No user record was found."));
+        Pet pet = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("No pet record was found."));
+        User user = userRepository.findById(pet.getClient().getId()).orElseThrow(() -> new PetsNotFound("No user record was found."));
         userAuthOrIsAdmin(userDetails, user.getUserCpf());
-        return pets;
+        return pet;
     }
 
     /**
@@ -93,27 +104,27 @@ public class PetsServiceImpl implements PetsService {
     @Override
     public void deletePetById(Long id) {
         UserDetails userAuth = getUserAuth();
-        Pets pets = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("Pet not found"));
-        User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new PetsNotFound("User pets not found"));
+        Pet pet = petsRepository.findById(id).orElseThrow(() -> new PetsNotFound("Pet not found"));
+        User user = userRepository.findById(pet.getClient().getId()).orElseThrow(() -> new PetsNotFound("User pets not found"));
         userAuthOrIsAdmin(userAuth, user.getUserCpf());
-        petsRepository.deleteById(pets.getId());
+        petsRepository.deleteById(pet.getId());
     }
 
 
     @Override
-    public Pets updatePet(PetsDto petsDto) {
+    public Pet updatePet(PetsDto petsDto) {
         UserDetails userAuth = getUserAuth();
         return saveUpdate(userAuth, petsDto);
     }
 
 
-    private Pets saveUpdate(UserDetails userAuth, PetsDto petsDto) {
-        User user = userRepository.findById(petsDto.getIdClient()).orElseThrow(() -> new PetsNotFound("No user record was found."));
+    private Pet saveUpdate(UserDetails userAuth, PetsDto petsDto) {
+        User user = userRepository.findById(petsDto.getUserId()).orElseThrow(() -> new PetsNotFound("No user record was found."));
         userAuthOrIsAdmin(userAuth, user.getUserCpf());
-        Pets pets = petsMapper.toEntity(petsDto);
-        pets.setBirthDate(petsDto.getBirthDate());
-        pets.setDogName(petsDto.getDogName());
-        return petsRepository.save(pets);
+        Pet pet = petsMapper.toEntity(petsDto);
+        pet.setBirthDate(petsDto.getBirthDate());
+        pet.setDogName(petsDto.getDogName());
+        return petsRepository.save(pet);
     }
 
 
@@ -122,16 +133,7 @@ public class PetsServiceImpl implements PetsService {
      */
 
     // Métodos reutilizáveis
-    
-    private void userPetIsPresent(Pets pets) {
-        Optional<User> userPet = userRepository.findById(pets.getClient().getId());
-        if (userPet.isPresent()) {
-            Optional<Pets> petExist = petsRepository.findByClientNameAndDogName(userPet.get().getFullName(), pets.getDogName());
-            if (petExist.isPresent()) {
-                throw new PetsAlreadyExist("Pet already exist. Please verify pet name and try again");
-            }
-        }
-    }
+
 
     private void isAdmin(UserDetails userAuth) {
         boolean isAdmin = userAuth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
@@ -150,7 +152,7 @@ public class PetsServiceImpl implements PetsService {
         return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    private void petsListIsEmpty(List<Pets> pets) {
+    private void petsListIsEmpty(List<Pet> pets) {
         if (pets == null) {
             throw new PetsNotFound("No pets found.");
         }

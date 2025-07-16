@@ -2,39 +2,33 @@ package com.project.petshop.petshop.mapper;
 
 import com.project.petshop.petshop.dto.AppointmentDto;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
-import com.project.petshop.petshop.domain.entities.Pets;
-import com.project.petshop.petshop.domain.entities.Appointment;
+import com.project.petshop.petshop.model.entities.Pet;
+import com.project.petshop.petshop.model.entities.Appointment;
+import com.project.petshop.petshop.model.entities.ServiceProvided;
 import com.project.petshop.petshop.repository.PetsRepository;
-import com.project.petshop.petshop.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.project.petshop.petshop.repository.ServiceProvidedRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
 @Component
+@AllArgsConstructor
 public class AppointmentMapper {
+    private final PetsRepository petsRepository;
+    private final ServiceProvidedRepository serviceProvidedRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    public Appointment toEntity(AppointmentDto appointmentDto) {
 
-    @Autowired
-    private PetsRepository petsRepository;
-
-    public Appointment toEntity(AppointmentDto serviceDto) {
-
-        Optional<Pets> pets = petsRepository.findById(serviceDto.getIdPet());
-
-        if (pets.isEmpty()) {
-            throw new PetsNotFound("Pet not found");
-        } else {
+        Optional<Pet> petFound = petsRepository.findById(appointmentDto.getPetId());
+        Optional<ServiceProvided> serviceFound = serviceProvidedRepository.findById(appointmentDto.getServiceProvidedId());
+        if (petFound.isPresent()) {
             return Appointment.builder()
-                    .pet(pets.get())
-                    .price(serviceDto.getPrice())
-                    .description(serviceDto.getDescription())
-                    .date(serviceDto.getDate())
-                    .petName(pets.get().getDogName())
-                    .clientName(pets.get().getClientName())
+                    .pet(petFound.get())
+                    .price(serviceFound.get().getPrice())
+                    .description(serviceFound.get().getDescription())
+                    .date(appointmentDto.getDate())
                     .build();
-        }
+        } else return null;
     }
 }

@@ -1,79 +1,65 @@
 package com.project.petshop.petshop.controller.pets;
 
+import com.project.petshop.petshop.dto.PetDtoPublic;
+import com.project.petshop.petshop.model.entities.Pet;
 import com.project.petshop.petshop.dto.PetsDto;
-import com.project.petshop.petshop.domain.entities.Pets;
 import com.project.petshop.petshop.service.interfaces.pets.PetsService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/pets")
+@AllArgsConstructor
 public class PetsController {
-    @Autowired
-    private PetsService petsService;
+
+    private final PetsService petsService;
 
 
     @PostMapping("/save")
-    @Operation(description = "Persiste um novo pet no banco de dados.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Retorna o pet criado."),
-            @ApiResponse(responseCode = "409", description = "Erro em caso de conflito."),
-            @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
-    })
+    @Operation(description = "Persiste um novo pet no banco de dados. (Admins)")
     public ResponseEntity<?> save(@Valid @RequestBody PetsDto petsDto) {
-        Pets pets = petsService.createPet(petsDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(pets);
+        Pet pet = petsService.createPet(petsDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pet);
+    }
+    @PostMapping("/savePublic")
+    @Operation(description = "Persiste um novo pet no banco de dados. (Publico)")
+    public ResponseEntity<?> savePublic(@Valid @RequestBody PetDtoPublic petsDtoPublic) {
+        Pet pet = petsService.createPetPublic(petsDtoPublic);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pet);
     }
 
 
     @GetMapping("/findAll")
-    @Operation(description = "Busca uma lista de pets cadastrados")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna uma lista de pets cadastrados."),
-            @ApiResponse(responseCode = "404", description = "Erro em caso de nenhum registro encontrado."),
-            @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso")
-    })
-    public ResponseEntity<List<Pets>> findAll() {
+    @Operation(description = "Busca uma lista de pets cadastrados.")
+    public ResponseEntity<List<Pet>> findAll() {
         return ResponseEntity.ok(petsService.findAllPets());
     }
 
 
     @GetMapping("/find/{id}")
-    @Operation(description = "Busca um pet específico pelo seu ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Retorna o pet encontrado."),
-            @ApiResponse(responseCode = "404", description = "Erro caso o pet informado não tenha registro no banco de dados."),
-            @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
-    })
-    public ResponseEntity<Pets> findById(@PathVariable Long id) {
+    @Operation(description = "Busca um pet específico pelo seu ID.")
+    public ResponseEntity<Pet> findById(@PathVariable Long id) {
         return ResponseEntity.ok(petsService.findPetById(id));
     }
 
 
     @DeleteMapping("/delete/{id}")
     @Operation(description = "Deleta um pet com base no seu ID.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Sem retorno. Porém, a requisição foi bem sucedida!"),
-            @ApiResponse(responseCode = "404", description = "Erro caso o pet informado não exista."),
-            @ApiResponse(responseCode = "403", description = "Erro de permissão de acesso.")
-    })
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         petsService.deletePetById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/update")
-    public ResponseEntity<Pets> update(@Valid @RequestBody PetsDto petsDto) {
-        Pets petsSaved = petsService.updatePet(petsDto);
-        return ResponseEntity.ok(petsSaved);
+    @Operation(description = "Atualiza o Pet no banco de dados.")
+    public ResponseEntity<Pet> update(@Valid @RequestBody PetsDto petsDto) {
+        Pet petSaved = petsService.updatePet(petsDto);
+        return ResponseEntity.ok(petSaved);
     }
 }

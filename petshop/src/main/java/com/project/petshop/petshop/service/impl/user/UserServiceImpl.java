@@ -8,8 +8,8 @@ import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
 import com.project.petshop.petshop.infra.jwt.service.JwtService;
 import com.project.petshop.petshop.mapper.RegisterMapper;
 import com.project.petshop.petshop.mapper.UserMapper;
-import com.project.petshop.petshop.domain.AccessToken;
-import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.model.entities.AccessToken;
+import com.project.petshop.petshop.model.entities.User;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.user.UserService;
 import lombok.AllArgsConstructor;
@@ -47,6 +47,8 @@ public class UserServiceImpl implements UserService {
     public User createUser(UserDto userDto) {
         validateUserCpfNotExist(userDto.getUserCpf());
         validateFullNameNotExist(userDto.getFullName());
+        alreadyEmailExist(userDto.getEmail());
+        alreadyNumberExist(userDto.getNumber());
         User user = userMapper.toEntity(userDto);
         encodePassword(user);
         userRepository.save(user);
@@ -253,5 +255,17 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found. Please try again.");
         }
         return user.get();
+    }
+    private void alreadyEmailExist(String email) {
+        Optional<User> emailExist = userRepository.findByEmail(email);
+        if (emailExist.isPresent()) {
+            throw new UserAlreadyException("This email is already registered.");
+        }
+    }
+    private void alreadyNumberExist(String number){
+        Optional<User> numberExist = userRepository.findByNumberContact(number);
+        if (numberExist.isPresent()) {
+            throw new UserAlreadyException("This contact number already exists.");
+        }
     }
 }

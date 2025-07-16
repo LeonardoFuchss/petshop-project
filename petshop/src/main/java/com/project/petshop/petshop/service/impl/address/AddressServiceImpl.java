@@ -4,7 +4,7 @@ import com.project.petshop.petshop.dto.AddressDto;
 import com.project.petshop.petshop.exceptions.address.AddressAlreadyExist;
 import com.project.petshop.petshop.exceptions.address.AddressNotFound;
 import com.project.petshop.petshop.mapper.AddressMapper;
-import com.project.petshop.petshop.domain.entities.Address;
+import com.project.petshop.petshop.model.entities.Address;
 import com.project.petshop.petshop.repository.AddressRepository;
 import com.project.petshop.petshop.service.interfaces.address.AddressService;
 import lombok.AllArgsConstructor;
@@ -16,8 +16,6 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class AddressServiceImpl implements AddressService {
-
-
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
 

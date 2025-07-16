@@ -2,7 +2,7 @@ package com.project.petshop.petshop.infra.jwt.filter;
 
 import com.project.petshop.petshop.exceptions.user.InvalidTokenException;
 import com.project.petshop.petshop.infra.jwt.service.JwtService;
-import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.model.entities.User;
 import com.project.petshop.petshop.service.interfaces.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

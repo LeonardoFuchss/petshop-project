@@ -1,6 +1,5 @@
 package com.project.petshop.petshop.dto;
 
-import com.project.petshop.petshop.model.entities.User;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
@@ -15,9 +14,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PetsDto {
-    @NotNull(message = "The customer cannot be null or void.")
-    private Long userId;
+public class PetDtoPublic {
     @Past(message = "The birthday date must be in the past.")
     @NotNull(message = "Birth date cannot be null")
     private LocalDate birthDate;

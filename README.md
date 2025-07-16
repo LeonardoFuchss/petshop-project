@@ -2,16 +2,16 @@
 
 ## 📌 Descrição
 
-### Sistema de controle de atendimentos de uma petshop, fornecendo gerenciamento de cadastros de clientes e seus respectivos pets. O sistema possui dois tipos de acesso:
+### Sistema de controle de atendimentos de uma petshop, fornecendo gerenciamento de cadastros de clientes e seus respectivos pet. O sistema possui dois tipos de acesso:
 
 🔹 Admin: Pode incluir, excluir, alterar e visualizar qualquer cadastro. <br>
-🔹 Cliente: Pode visualizar e alterar apenas os seus registros e/ou registros dos seus pets.
+🔹 Cliente: Pode visualizar e alterar apenas os seus registros e/ou registros dos seus pet.
 
 ---
 
 ## 🎯 Objetivo
 
-Implementar um serviço que permita a gestão de clientes e pets através de uma interface HTTP/REST.
+Implementar um serviço que permita a gestão de clientes e pet através de uma interface HTTP/REST.
 
 ---
 

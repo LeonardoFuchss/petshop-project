@@ -4,12 +4,10 @@ import com.project.petshop.petshop.exceptions.address.AddressAlreadyExist;
 import com.project.petshop.petshop.exceptions.address.AddressNotFound;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentExist;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentNotFound;
-import com.project.petshop.petshop.exceptions.breed.BreedAlreadyExist;
-import com.project.petshop.petshop.exceptions.breed.BreedNotFound;
-import com.project.petshop.petshop.exceptions.contact.ContactAlreadyExist;
-import com.project.petshop.petshop.exceptions.contact.ContactNotFound;
 import com.project.petshop.petshop.exceptions.pets.PetsAlreadyExist;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
+import com.project.petshop.petshop.exceptions.serviceprovided.ServiceAlreadyExist;
+import com.project.petshop.petshop.exceptions.serviceprovided.ServiceNotFound;
 import com.project.petshop.petshop.exceptions.user.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +29,6 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
     /*
      * Método genérico que captura a exceção e retorna uma resposta personalizada.
      * @Param ex Exceção.
@@ -80,30 +76,6 @@ public class GlobalExceptionHandler {
 
 
 
-    /* BREED */
-
-    @ExceptionHandler(BreedNotFound.class)
-    public ResponseEntity<Map<String, Object>> handleBreedNotFound(Exception ex, HttpServletRequest request) {
-        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
-    }
-    @ExceptionHandler(BreedAlreadyExist.class)
-    public ResponseEntity<Map<String, Object>> handleBreedAlreadyExist(Exception ex, HttpServletRequest request) {
-        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
-    }
-
-
-    /* CONTACT */
-
-    @ExceptionHandler(ContactAlreadyExist.class)
-    public ResponseEntity<Map<String, Object>> handleContactAlreadyExist(Exception ex, HttpServletRequest request) {
-        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
-    }
-    @ExceptionHandler(ContactNotFound.class)
-    public ResponseEntity<Map<String, Object>> handleContactNotFound(Exception ex, HttpServletRequest request) {
-        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
-    }
-
-
 
     /* ADDRESS */
     @ExceptionHandler(AddressAlreadyExist.class)
@@ -124,6 +96,17 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(AppointmentNotFound.class)
     public ResponseEntity<Map<String, Object>> handleAppointmentNotFound(Exception ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
+    }
+
+    /* Service provided */
+
+    @ExceptionHandler(ServiceAlreadyExist.class)
+    public ResponseEntity<Map<String, Object>> handleServiceExist(Exception ex, HttpServletRequest request) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
+    }
+    @ExceptionHandler(ServiceNotFound.class)
+    public ResponseEntity<Map<String, Object>> handleServiceNotFound(Exception ex, HttpServletRequest request) {
         return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 

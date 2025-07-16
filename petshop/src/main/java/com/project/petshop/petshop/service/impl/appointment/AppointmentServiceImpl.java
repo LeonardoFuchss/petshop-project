@@ -1,25 +1,25 @@
 package com.project.petshop.petshop.service.impl.appointment;
 
-import com.project.petshop.petshop.domain.entities.Pets;
-import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.model.entities.Pet;
+import com.project.petshop.petshop.model.entities.User;
 import com.project.petshop.petshop.dto.AppointmentDto;
+import com.project.petshop.petshop.dto.AppointmentUpdateDto;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentExist;
 import com.project.petshop.petshop.exceptions.appointment.AppointmentNotFound;
 import com.project.petshop.petshop.exceptions.pets.PetsNotFound;
 import com.project.petshop.petshop.exceptions.user.UnauthorizedException;
 import com.project.petshop.petshop.exceptions.user.UserNotFoundException;
 import com.project.petshop.petshop.mapper.AppointmentMapper;
-import com.project.petshop.petshop.domain.entities.Appointment;
+import com.project.petshop.petshop.model.entities.Appointment;
 import com.project.petshop.petshop.repository.AppointmentRepository;
 import com.project.petshop.petshop.repository.PetsRepository;
 import com.project.petshop.petshop.repository.UserRepository;
 import com.project.petshop.petshop.service.interfaces.appointment.AppointmentService;
-import com.project.petshop.petshop.service.interfaces.user.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -30,19 +30,18 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
     private final UserRepository userRepository;
-    private final UserService userService;
     private final PetsRepository petsRepository;
-    private final AppointmentService appointmentService;
+
 
     @Override
     public Appointment createAppointment(AppointmentDto appointmentDto) {
-        dateAlreadyExist(appointmentDto.getDate()); /* Busca se já possui um agendamento nesta data */
         Appointment appointment = appointmentMapper.toEntity(appointmentDto); /* Mapeamento de DTO para entidade */
         UserDetails userDetails = getUserAuth(); /* Busca usuário autenticado no contexto do spring. */
         User user = userRepository.findById(appointment.getPet().getClient().getId()).orElseThrow(
                 () -> new UserNotFoundException("User not found")
         );
         isAdminOrOwner(userDetails, user); /* Verifica se é admin ou owner */
+        checksEqualDates(appointment); /* Verifica data do agendamento */
         return appointmentRepository.save(appointment);
     }
 
@@ -59,15 +58,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Appointment updateAppointment(Long id, AppointmentDto appointmentDto) {
+    public Appointment updateAppointment(Long id, AppointmentUpdateDto appointmentUpdateDto) {
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFound("Appointment not found."));
-        dateAlreadyExistAndIsNotEqualsCurrentAppointment(appointmentDto.getDate(), appointment);
-        Pets pets = petsRepository.findById(appointment.getPet().getId()).orElseThrow(() -> new PetsNotFound("Pet not found"));
-        User user = userRepository.findById(pets.getClient().getId()).orElseThrow(() -> new UserNotFoundException("User not found."));
+        Pet pet = petsRepository.findById(appointment.getPet().getId()).orElseThrow(() -> new PetsNotFound("Pet not found"));
+        User user = userRepository.findById(pet.getClient().getId()).orElseThrow(() -> new UserNotFoundException("User not found."));
         UserDetails userDetails = getUserAuth();
         isAdminOrOwner(userDetails, user);
-        appointment.setDate(appointmentDto.getDate());
-        appointment.setPrice(appointmentDto.getPrice());
+        appointment.setDate(appointmentUpdateDto.getDate());
+        checksEqualDates(appointment);
+        appointment.setPrice(appointmentUpdateDto.getPrice());
         return appointmentRepository.save(appointment);
     }
 
@@ -76,7 +75,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Appointment findAppointmentById(Long id) { /* Busca um agendamento com base no identificador */
         Optional<Appointment> appointmentOptional = Optional.ofNullable(appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFound("Appointment not found")));
         UserDetails userDetails = getUserAuth();
-        User user = userRepository.findByFullName(appointmentOptional.get().getClientName()).orElseThrow(() -> new UserNotFoundException("User not found"));
+        Optional<Pet> petFind = petsRepository.findById(appointmentOptional.get().getPet().getId());
+        User user = userRepository.findById(petFind.get().getClient().getId()).orElseThrow(() -> new UserNotFoundException("User not found"));
         isAdminOrOwner(userDetails, user);
         return appointmentOptional.get();
     }
@@ -104,18 +104,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     /* MÉTODOS REUTILIZÁVEIS */
 
-    private void dateAlreadyExistAndIsNotEqualsCurrentAppointment(LocalDateTime localDateTime, Appointment appointment) {
-        Optional<Appointment> appointmentFound = appointmentRepository.findByDate(localDateTime);
-        if (appointmentFound.isPresent()) {
-            if (!appointmentFound.get().getDate().equals(appointment.getDate())) {
-                throw new AppointmentExist("There is already an appointment for this date.");
-            }
-        }
-    }
-    private void dateAlreadyExist(LocalDateTime localDateTime) {
-        Optional<Appointment> appointment = appointmentRepository.findByDate(localDateTime);
-        if (appointment.isPresent()) {
-            throw new AppointmentExist("There is already an appointment for this date.");
+    private void checksEqualDates(Appointment appointment) { /* Verifica se o número de agendamentos nesta data é maior ou igual a 7 */
+        long totalAppointmentByDate = appointmentRepository.countAppointmentsByDate(appointment.getDate(), appointment.getId());
+        if (totalAppointmentByDate >= 7) {
+            throw new AppointmentExist("This date is not available");
         }
     }
     private UserDetails getUserAuth() {

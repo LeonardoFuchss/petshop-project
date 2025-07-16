@@ -1,11 +1,10 @@
 package com.project.petshop.petshop.infra.jwt.service;
 
 import com.project.petshop.petshop.exceptions.user.InvalidTokenException;
-import com.project.petshop.petshop.domain.AccessToken;
-import com.project.petshop.petshop.domain.entities.User;
+import com.project.petshop.petshop.model.entities.AccessToken;
+import com.project.petshop.petshop.model.entities.User;
 import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;

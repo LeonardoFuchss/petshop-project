@@ -1,13 +1,15 @@
 package com.project.petshop.petshop.mapper;
 
 import com.project.petshop.petshop.dto.UserDto;
-import com.project.petshop.petshop.domain.entities.User;
-import com.project.petshop.petshop.domain.enums.Profile;
+import com.project.petshop.petshop.model.entities.User;
+import com.project.petshop.petshop.model.entities.enums.Profile;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
+@AllArgsConstructor
 public class UserMapper {
 
     public User toEntity(UserDto dto) {
@@ -19,6 +21,8 @@ public class UserMapper {
                 .profile(profileEnum)
                 .password(dto.getPassword())
                 .signUpDate(LocalDateTime.now())
+                .email(dto.getEmail())
+                .numberContact(dto.getNumber())
                 .build();
     }
 }

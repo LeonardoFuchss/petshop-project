@@ -24,7 +24,7 @@ public class UserController {
 
     @PostMapping("/save")
     @Operation(description = "Persiste um novo usuário no banco de dados. (acesso restrito para admins)")
-    public ResponseEntity<?> save(@Valid @RequestBody UserDto userdTO) {
+    public ResponseEntity<User> save(@Valid @RequestBody UserDto userdTO) {
         User user = userService.createUser(userdTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
@@ -49,7 +49,6 @@ public class UserController {
         }
     }
 
-
     @GetMapping("/findAll")
     @Operation(description = "Busca os usuários cadastrados.")
     public ResponseEntity<List<User>> findAll() {
@@ -57,21 +56,10 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-
-
-    @GetMapping("/find/{id}")
-    @Operation(description = "Busca um usuário específico pelo seu ID")
-    public ResponseEntity<Optional<User>> findById(@PathVariable Long id) {
-        Optional<User> user = userService.findUserById(id);
-        return ResponseEntity.ok().body(user);
-    }
-
-
-
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{cpf}")
     @Operation(description = "Deleta um usuário com base no seu ID.")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userService.deleteUserById(id);
+    public ResponseEntity<Void> delete(@PathVariable String cpf) {
+        userService.deleteUserByCpf(cpf);
         return ResponseEntity.noContent().build();
     }
 

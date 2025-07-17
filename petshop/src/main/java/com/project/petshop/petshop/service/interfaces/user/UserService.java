@@ -11,8 +11,7 @@ import java.util.Optional;
 public interface UserService {
     User createUser(UserDto userdTO);
     List<User> findAllUsers();
-    Optional<User> findUserById(Long id);
-    void deleteUserById(Long id);
+    void deleteUserByCpf(String cpf);
     Optional<User> findUserByCpf(String cpf);
     AccessToken authenticate(String cpf, String password);
     User publicUserRegistration(RegisterDto registerDto);

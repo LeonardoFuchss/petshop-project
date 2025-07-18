@@ -22,13 +22,11 @@ public class AppointmentMapper {
 
         Optional<Pet> petFound = petsRepository.findById(appointmentDto.getPetId());
         Optional<ServiceProvided> serviceFound = serviceProvidedRepository.findById(appointmentDto.getServiceProvidedId());
-        if (petFound.isPresent()) {
-            return Appointment.builder()
-                    .pet(petFound.get())
-                    .price(serviceFound.get().getPrice())
-                    .description(serviceFound.get().getDescription())
-                    .date(appointmentDto.getDate())
-                    .build();
-        } else return null;
+        return petFound.map(pet -> Appointment.builder()
+                .pet(pet)
+                .price(serviceFound.get().getPrice())
+                .description(serviceFound.get().getDescription())
+                .date(appointmentDto.getDate())
+                .build()).orElse(null);
     }
 }

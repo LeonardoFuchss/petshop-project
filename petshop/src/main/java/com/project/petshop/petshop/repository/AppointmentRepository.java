@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     Optional<Appointment> findByDate(LocalDateTime date);
+
     @Query("SELECT COUNT(a) from Appointment a where a.date = :date and (:id IS NULL OR a.id <> :id)")
-    long countAppointmentsByDate(@Param("date") LocalDateTime dateTime, @Param("id") int id); /* Busca no banco a quantidade de agendamentos existentes, ignorando o agendamento de id atual. */
+    long countAppointmentsByDate(@Param("date") LocalDateTime dateTime, @Param("id") Long id); /* Busca no banco a quantidade de agendamentos existentes, ignorando o agendamento de id atual. */
 }

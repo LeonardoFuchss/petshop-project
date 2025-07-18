@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Long id;
     @ManyToOne
     private Pet pet;
     @ManyToOne

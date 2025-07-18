@@ -26,34 +26,21 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class PetsServiceImpl implements PetsService {
-
     private final PetsRepository petsRepository;
     private final PetsMapper petsMapper;
     private final UserRepository userRepository;
     private final PetMapperPublic petMapperPublic;
 
 
-    /**
-     * Persiste um novo pet no banco de dados.
-     * .
-     * Recebe o DTO por parâmetro, faz o mapeamento de DTO para entidade.
-     * Salva um novo peto no banco de dados
-     * Acesso restrito para admins
-     */
     @Override
     public Pet createPet(PetsDto petsDto) {
         Pet pet = petsMapper.toEntity(petsDto);
+        Optional<User> user = userRepository.findById(pet.getClient().getId());
         UserDetails userAuth = getUserAuth();
-        isAdmin(userAuth);
+        userAuthOrIsAdmin(userAuth, user.get().getUserCpf());
         return petsRepository.save(pet);
     }
-    /**
-     * Persiste um novo pet no banco de dados.
-     * .
-     * Recebe o DTO por parâmetro, faz o mapeamento de DTO para entidade.
-     * Salva um novo peto no banco de dados
-     * Acesso liberado para público.
-     */
+
     @Override
     public Pet createPetPublic(PetDtoPublic petDtoPublic) {
         Pet pet = petMapperPublic.toEntity(petDtoPublic);
@@ -63,12 +50,6 @@ public class PetsServiceImpl implements PetsService {
         return petsRepository.save(pet);
     }
 
-    /**
-     * Realiza uma busca de todos os pets registrados no banco de dados.
-     * .
-     * Recupera o usuário autenticado e verifica se ele é admin (apenas admin devem ter acesso).
-     * Recupera a lista dos pets.
-     */
     @Override
     public List<Pet> findAllPets() {
         UserDetails userAuth = getUserAuth();
@@ -78,13 +59,6 @@ public class PetsServiceImpl implements PetsService {
         return petList;
     }
 
-    /**
-     * Retorna um usuário com base no id passado por parâmetro.
-     * Recupera o usuário autenticado.
-     * Recupera o pet e o seu usuário pelo ID.
-     * verifica se o usuário autenticado é admin ou se o usuário do pet é igual ao usuário autenticado.
-     * (Verificação feita para apenas admins conseguirem visualizar ou usuários client visualizarem apenas o registro de seus pets).
-     */
     @Override
     public Pet findPetById(Long id) {
         UserDetails userDetails = getUserAuth();
@@ -94,13 +68,6 @@ public class PetsServiceImpl implements PetsService {
         return pet;
     }
 
-    /**
-     * Deleta um pet com base no ID.
-     * Recupera o usuário autenticado.
-     * Busca o Pet com base no ID.
-     * Verifica se o usuário autenticado é ADMIN ou se o usuário autenticado é o mesmo usuário recuperado pelo pet.
-     * (Verificação feita para apenas admins conseguirem visualizar ou usuários client visualizarem apenas o registro de seus pets).
-     */
     @Override
     public void deletePetById(Long id) {
         UserDetails userAuth = getUserAuth();

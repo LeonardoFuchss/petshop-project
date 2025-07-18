@@ -26,17 +26,9 @@ public class User {
     private Profile profile;
     private String fullName;
     private String password;
-    @NotNull(message = "Date value cannot be null")
-    @PastOrPresent(message = "Invalid date. The date cannot be in the future.")
     private LocalDateTime signUpDate;
     private String email;
     private String numberContact;
 
 
-    public User(UserDto userDto) {
-        this.userCpf = userDto.getUserCpf();
-        this.fullName = userDto.getFullName();
-        this.password = userDto.getPassword();
-        this.signUpDate = LocalDateTime.now();
-    }
 }

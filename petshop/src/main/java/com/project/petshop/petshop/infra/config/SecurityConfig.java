@@ -5,6 +5,7 @@ import com.project.petshop.petshop.infra.jwt.service.JwtService;
 import com.project.petshop.petshop.service.interfaces.user.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -37,13 +38,6 @@ public class SecurityConfig {
                     .csrf(AbstractHttpConfigurer::disable) /* Desabilita a proteção contra CSRF */
                     .cors(cors -> cors.configure(http)) /* Habilita CORS */
                     .authorizeHttpRequests(auth -> {
-                        auth.requestMatchers( "/v3/api-docs/**",  // Documentação OpenAPI
-                                "/swagger-ui/**",    // Interface Swagger UI
-                                "/swagger-ui.html",  // Página do Swagger
-                                "/swagger-resources/**", // Recursos internos do Swagger
-                                "/webjars/**" // Dependências do Swagger
-                        ).permitAll();
-                        auth.requestMatchers("/swagger-resources/**").permitAll();
                         auth.requestMatchers("/users/delete/**").permitAll();
                         auth.requestMatchers("/users/**").permitAll();
                         auth.requestMatchers("/address/**").hasRole("ADMIN"); /* Limita acesso a admin */
@@ -63,10 +57,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues(); /* Cria uma configuração padrão de cors, permitindo os valores padrões */
-
         UrlBasedCorsConfigurationSource cors = new UrlBasedCorsConfigurationSource(); /* Cria um objeto para gerenciar configurações de CORS com base nas URLs */
         cors.registerCorsConfiguration("/**", configuration); /* Aplica a configuração para todas as rotas do sistema. */
-
         return cors; /* Retorna a configuração de CORS para ser usada pelo Spring Security */
     }
 }

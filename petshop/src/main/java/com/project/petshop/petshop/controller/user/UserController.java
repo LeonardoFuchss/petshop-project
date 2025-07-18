@@ -56,10 +56,10 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @DeleteMapping("/delete/{cpf}")
+    @DeleteMapping("/delete/{id}")
     @Operation(description = "Deleta um usuário com base no seu ID.")
-    public ResponseEntity<Void> delete(@PathVariable String cpf) {
-        userService.deleteUserByCpf(cpf);
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
 

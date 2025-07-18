@@ -26,7 +26,6 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
-
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
     private final UserRepository userRepository;

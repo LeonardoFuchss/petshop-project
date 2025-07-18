@@ -33,8 +33,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("@authService.isAdmin()")
     public User createUser(UserDto userDto) {
-        validateUserCpfNotExist(userDto.getUserCpf());
-        validateFullNameNotExist(userDto.getFullName());
+        alreadyUserExist(userDto.getUserCpf());
+        alreadyFullNameExist(userDto.getFullName());
         alreadyEmailExist(userDto.getEmail());
         alreadyNumberExist(userDto.getNumber());
         User user = userMapper.toEntity(userDto);
@@ -57,10 +57,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @PreAuthorize("@authService.isSelf(#cpf) or authService.isAdmin()")
-    public void deleteUserByCpf(String cpf) {
-        userRepository.findByUserCpf(cpf).orElseThrow(() -> new UserNotFoundException("User not found"));
-        userRepository.deleteUserByUserCpf(cpf);
+    public void deleteUserById(Long id) {
+        userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
+        userRepository.deleteUserById(id);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User publicUserRegistration(RegisterDto registerDto) {
-        validateUserCpfNotExist(registerDto.getUserCpf());
+        alreadyUserExist(registerDto.getUserCpf());
         User user = registerMapper.toEntity(registerDto);
         user.setSignUpDate(LocalDateTime.now());
         encodePassword(user);
@@ -137,7 +136,7 @@ public class UserServiceImpl implements UserService {
     /**
      * Verifica se já existe um usuário para o CPF cadastrado.
      */
-    private void validateUserCpfNotExist(String cpf) {
+    private void alreadyUserExist(String cpf) {
         Optional<User> user = userRepository.findByUserCpf(cpf);
         if (user.isPresent()) {
             throw new UserAlreadyException("This CPF is already registered. Login or try again!");
@@ -152,11 +151,13 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Verifica se já existe um full name registrado.
+     * Verifica se já existe o full name registrado.
      */
-    private void validateFullNameNotExist(String fullName) {
+    private void alreadyFullNameExist(String fullName) {
         Optional<User> user = userRepository.findByFullName(fullName);
-        userFound(user);
+        if (user.isPresent()) {
+            throw new UserAlreadyException("User already exist.");
+        }
     }
 
     /**
